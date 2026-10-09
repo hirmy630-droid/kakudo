@@ -44,9 +44,9 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
 .horizontal #c::placeholder{color:#71717a;opacity:1;line-height:normal}
 
 html,body,main,#fullView{touch-action:pan-x pan-y}
-</style><link rel="manifest" href="./manifest.json?v=20261010-0127">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0127">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0127">
+</style><link rel="manifest" href="./manifest.json?v=20261010-0158">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0158">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0158">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -69,10 +69,10 @@ for(const type of ['touchstart','touchmove']){
 }
 
 const fields=['y','x','c','a','b'];
-let values={y:'',x:'',c:'100',a:'',b:''},active='y',fresh=true,down=true,error='',editBase=null;
+let values={y:'',x:'',c:'100',a:'',b:''},active='y',fresh=true,down=true,error='',editBase=null,fixedMode='angle';
 const STORAGE_KEY='kyowa-angle:state:v1:'+new URL('./',location.href).pathname;
 function saveState(){
- try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:1,values,active,down,error}))}
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:1,values,active,down,error,fixedMode}))}
  catch(e){console.warn('入力状態を端末に保存できませんでした。',e)}
 }
 function restoreState(){
@@ -85,7 +85,7 @@ function restoreState(){
    if(typeof v!=='string'||v.length>100||(v!==''&&(!Number.isFinite(Number(v))||Number(v)<0)))return;
    restored[k]=v;
   }
-  values=restored;down=saved.down;active=fields.includes(saved.active)?saved.active:'y';
+  values=restored;down=saved.down;fixedMode=saved.fixedMode==='length'?'length':'angle';active=fields.includes(saved.active)?saved.active:'y';
   error=typeof saved.error==='string'&&saved.error.length<=160?saved.error:'';
   fresh=true;editBase=null;
  }catch(e){console.warn('保存された入力状態を読み込めませんでした。',e)}
@@ -104,6 +104,15 @@ function calculate(k){
   fields.forEach(f=>{if(f!==k&&f!=='c')values[f]=''});return;
  }
  let c=num('c'),a=num('a'),b=num('b'),r=num('y')===null?null:num('y')/100;
+ if(fixedMode==='length'&&(k==='a'||k==='b')&&(c===null||c<=0)){error='水平寸法固定：先に0より大きい水平寸法を入力してください。';return}
+ if(fixedMode==='angle'&&(k==='a'||k==='b')){
+  if(r===null){error='角度固定：先に角度または勾配を入力してください。';return}
+  if(k==='a'&&r===0){error='角度0では勾配幅から逆算できません。斜辺または水平寸法を入力してください。';return}
+  const nextC=k==='a'?n/r:n/Math.hypot(1,r);
+  if(!Number.isFinite(nextC)||nextC<=0){error='この角度では0より大きい寸法を入力してください。';return}
+  put('c',nextC);put('a',nextC*r);put('b',Math.hypot(nextC,nextC*r));return;
+ }
+
  if(c!==null&&c<=0){error='水平寸法は0より大きい値を入力してください。';if(k!=='a')values.a='';if(k!=='b')values.b='';return}
  if(k==='x'||k==='y'){
   r=k==='x'?Math.tan(n*Math.PI/180):n/100;
@@ -128,8 +137,9 @@ function solveSides(c,a,b){
  put('c',c);put('a',a);put('b',Math.hypot(c,a));put('y',a/c*100);put('x',Math.atan2(a,c)*180/Math.PI);
 }
 function key(key){
+ if(key==='固定'){fixedMode=fixedMode==='angle'?'length':'angle';fresh=true;editBase=null;render();return;}
  if(active==='y'&&key==='.')return;
- if(key==='AC'){values={y:'',x:'',c:'100',a:'',b:''};active='y';down=true;error='';fresh=true;editBase=null;render();return}
+ if(key==='AC'){values={y:'',x:'',c:'100',a:'',b:''};active='y';down=true;fixedMode='angle';error='';fresh=true;editBase=null;render();return}
  if(key==='⏎'){active=fields[(fields.indexOf(active)+1)%fields.length];fresh=true;render();return}
  if(key==='C'){values[active]='';calculate(active);fresh=true;render();return}
  if(fresh||!editBase)editBase={...values};
@@ -173,6 +183,8 @@ function fitInput(input,maxSize){
 }
 window.addEventListener('resize',()=>{for(const k of fields)fitInput(el(k),k==='a'||k==='b'?28:k==='c'?26:23)});
 function render(){
+ const modeButton=el('fixedModeKey');if(modeButton){modeButton.textContent=fixedMode==='angle'?'角':'長';modeButton.setAttribute('aria-label',(fixedMode==='angle'?'角度固定。水平寸法固定へ切り替え':'水平寸法固定。角度固定へ切り替え'));}
+
  el('c').style.color=num('c')===100?'#fb923c':'#ffffff';
  for(const k of fields){el(k).value=k===active&&!fresh?values[k]:fmt(values[k],k==='x'?1:0);fitInput(el(k),k==='a'||k==='b'?28:k==='c'?26:23)}
  document.querySelectorAll('[data-field]').forEach(n=>n.classList.toggle('active',n.dataset.field===active));el('error').textContent=error;
@@ -190,10 +202,10 @@ function render(){
  renderFullDiagram();
  saveState();
 }
-for(const [rowIndex,keys] of [['AC','.','00','0','⏎','C'],['1','2','3','4','5','6','7','8','9']].entries()){
+for(const [rowIndex,keys] of [['AC','固定','00','0','⏎','C'],['1','2','3','4','5','6','7','8','9']].entries()){
  const row=document.createElement('div');row.className='key-row'+(rowIndex===1?' digits':'');
  for(const k of keys){
- const b=document.createElement('button');b.type='button';b.textContent=k;b.className=k==='⏎'?'enter':['AC','C'].includes(k)?'clear':'';if(k==='⏎')b.setAttribute('aria-label','次の入力欄へ');b.addEventListener('click',()=>key(String(k)));row.append(b);
+ const b=document.createElement('button');b.type='button';b.textContent=k;if(k==='固定'){b.id='fixedModeKey';b.title='角：角度固定／長：水平寸法固定'}b.className=k==='⏎'?'enter':['AC','C'].includes(k)?'clear':'';if(k==='⏎')b.setAttribute('aria-label','次の入力欄へ');b.addEventListener('click',()=>key(String(k)));row.append(b);
  }
  document.querySelector('.keypad').append(row);
 }
