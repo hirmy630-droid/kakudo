@@ -38,9 +38,13 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
 #slopePlaceholder[hidden],#angleFieldLabel[hidden]{display:none}
 .twocol .field input{flex:1;width:0;padding-left:6px;padding-right:6px}
 
-</style><link rel="manifest" href="./manifest.json?v=20261010-0050">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0050">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0050">
+
+.horizontal #c{height:100%;padding-top:0;padding-bottom:0;line-height:normal}
+.horizontal #c:placeholder-shown{font-size:14px!important}
+.horizontal #c::placeholder{color:#71717a;opacity:1;line-height:normal}
+</style><link rel="manifest" href="./manifest.json?v=20261010-0105">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0105">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0105">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -56,6 +60,27 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
 'use strict';
 const fields=['y','x','c','a','b'];
 let values={y:'',x:'',c:'',a:'',b:''},active='y',fresh=true,down=true,error='',editBase=null;
+const STORAGE_KEY='kyowa-angle:state:v1:'+new URL('./',location.href).pathname;
+function saveState(){
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:1,values,active,down,error}))}
+ catch(e){console.warn('入力状態を端末に保存できませんでした。',e)}
+}
+function restoreState(){
+ try{
+  const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+  if(!saved||saved.version!==1||!saved.values||typeof saved.down!=='boolean')return;
+  const restored={};
+  for(const k of fields){
+   const v=saved.values[k];
+   if(typeof v!=='string'||v.length>100||(v!==''&&(!Number.isFinite(Number(v))||Number(v)<0)))return;
+   restored[k]=v;
+  }
+  values=restored;down=saved.down;active=fields.includes(saved.active)?saved.active:'y';
+  error=typeof saved.error==='string'&&saved.error.length<=160?saved.error:'';
+  fresh=true;editBase=null;
+ }catch(e){console.warn('保存された入力状態を読み込めませんでした。',e)}
+}
+
 const el=id=>document.getElementById(id);
 const num=k=>values[k]===''?null:Number(values[k]);
 const put=(k,n)=>{values[k]=Number.isFinite(n)?String(n):''};
@@ -94,7 +119,7 @@ function solveSides(c,a,b){
 }
 function key(key){
  if(active==='y'&&key==='.')return;
- if(key==='AC'){values={y:'',x:'',c:'',a:'',b:''};error='';fresh=true;render();return}
+ if(key==='AC'){values={y:'',x:'',c:'',a:'',b:''};active='y';down=true;error='';fresh=true;editBase=null;render();return}
  if(key==='⏎'){active=fields[(fields.indexOf(active)+1)%fields.length];fresh=true;render();return}
  if(key==='C'){values[active]='';calculate(active);fresh=true;render();return}
  if(fresh||!editBase)editBase={...values};
@@ -152,6 +177,7 @@ function render(){
  el('diagram').setAttribute('aria-label',(down?'下向き':'上向き')+'の勾配図');
  el('diagram').innerHTML=`<path d="M70 ${base}V18 M10 ${base}H70" stroke="#0785ff" stroke-width="3" stroke-dasharray="9 9" stroke-linecap="round" fill="none"/><g dominant-baseline="middle" stroke="#101012" stroke-width="7" stroke-linejoin="round" paint-order="stroke">${label(70,(base+18)/2,'A','#f4f4f5')}${label(40,base,'B','#f4f4f5')}</g><path d="M70 ${base}H270" stroke="#f97316" stroke-width="4" fill="none"/>${label(170,base-sign*27,fmt(values.c)||'水平寸法','#fb923c')}<path d="M270 ${base}V${tip}" stroke="#22c55e" stroke-width="4" fill="none"/>${label(282,(base+tip)/2+6,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','start')}<path d="M70 ${base}L270 ${tip}" stroke="#3b82f6" stroke-width="4" fill="none"/>${label(170,(base+tip)/2+(down?36+0.27*h:-(16+0.27*h)),valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
  renderFullDiagram();
+ saveState();
 }
 for(const [rowIndex,keys] of [['AC','.','00','0','⏎','C'],['1','2','3','4','5','6','7','8','9']].entries()){
  const row=document.createElement('div');row.className='key-row'+(rowIndex===1?' digits':'');
@@ -176,6 +202,7 @@ el('openDiagram').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '
 el('closeDiagram').addEventListener('click',()=>el('fullView').close());
 el('fullView').addEventListener('close',()=>{document.body.style.cssText=previousBodyStyle;window.scrollTo(0,savedScroll);el('openDiagram').focus({preventScroll:true})});
 el('fullDirection').addEventListener('click',()=>{down=!down;render()});
+restoreState();
 render();
 </script><script>
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
