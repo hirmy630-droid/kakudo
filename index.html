@@ -29,12 +29,12 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
 }
 .full-layout{padding-left:max(4px,env(safe-area-inset-left));padding-right:max(4px,env(safe-area-inset-right))}.full-bar{padding:0 8px}.full-unit{padding-right:8px}
 
-.app-heading{position:relative;display:flex;align-items:center;justify-content:flex-end;min-height:26px;margin:0 0 10px}
-.app-heading h1{font-size:18px;line-height:26px;margin:0;text-align:center}
-.app-heading .brand{position:absolute;left:0;font-size:14px;line-height:26px;font-weight:400;color:#9ca3af;white-space:nowrap}
-</style><link rel="manifest" href="./manifest.json?v=20261009-2100">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261009-2100">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261009-2100">
+.app-heading{position:relative;display:flex;align-items:flex-end;justify-content:space-between;min-height:26px;margin:0 0 10px;gap:12px}
+.app-heading h1{font-size:18px;line-height:26px;margin:0;text-align:left}
+.app-heading .brand{position:static;font-size:14px;line-height:20px;font-weight:400;color:#9ca3af;white-space:nowrap;align-self:flex-end}
+</style><link rel="manifest" href="./manifest.json?v=20261009-2108">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261009-2108">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261009-2108">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -135,7 +135,7 @@ function render(){
  el('angleB').textContent=anglesValid?angleText(180+(down?theta:-theta)):'—';
  const label=(x,y,t,color,anchor='middle')=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${color}" font-size="18" ${String(t).length>9?'textLength="108" lengthAdjust="spacingAndGlyphs"':''} font-weight="bold">${t}</text>`;
  el('diagram').setAttribute('aria-label',(down?'下向き':'上向き')+'の勾配図');
- el('diagram').innerHTML=`<path d="M70 ${base}V18 M10 ${base}H70" stroke="#0785ff" stroke-width="3" stroke-dasharray="9 9" stroke-linecap="round" fill="none"/><g dominant-baseline="middle" stroke="#101012" stroke-width="7" stroke-linejoin="round" paint-order="stroke">${label(70,(base+18)/2,'A','#f4f4f5')}${label(40,base,'B','#f4f4f5')}</g><path d="M70 ${base}H270" stroke="#f97316" stroke-width="4" fill="none"/>${label(170,base-sign*27,fmt(values.c)||'水平寸法','#fb923c')}<path d="M270 ${base}V${tip}" stroke="#22c55e" stroke-width="4" fill="none"/>${label(282,(base+tip)/2+6,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','start')}<path d="M70 ${base}L270 ${tip}" stroke="#3b82f6" stroke-width="4" fill="none"/>${label(170,(base+tip)/2+sign*21,valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
+ el('diagram').innerHTML=`<path d="M70 ${base}V18 M10 ${base}H70" stroke="#0785ff" stroke-width="3" stroke-dasharray="9 9" stroke-linecap="round" fill="none"/><g dominant-baseline="middle" stroke="#101012" stroke-width="7" stroke-linejoin="round" paint-order="stroke">${label(70,(base+18)/2,'A','#f4f4f5')}${label(40,base,'B','#f4f4f5')}</g><path d="M70 ${base}H270" stroke="#f97316" stroke-width="4" fill="none"/>${label(170,base-sign*27,fmt(values.c)||'水平寸法','#fb923c')}<path d="M270 ${base}V${tip}" stroke="#22c55e" stroke-width="4" fill="none"/>${label(282,(base+tip)/2+6,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','start')}<path d="M70 ${base}L270 ${tip}" stroke="#3b82f6" stroke-width="4" fill="none"/>${label(170,(base+tip)/2+(down?36+0.27*h:-(16+0.27*h)),valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
  renderFullDiagram();
 }
 for(const [rowIndex,keys] of [['C','00','0','⏎','AC'],['1','2','3','4','5','6','7','8','9']].entries()){
