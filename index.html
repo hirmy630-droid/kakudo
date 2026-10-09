@@ -1,778 +1,135 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>チーズ管計算</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --ios-bg: #000000;
-            --ios-card: #1c1c1e;
-            --ios-border: #333333;
-            --ios-orange: #ff9f0a;
-            --accent-90: #5e5ce6;
-            --accent-cheese: #0a84ff;
-            --accent-dist: #30d158;
-            --ios-silver: #c7c7cc;
-            --ios-silver-dark: #9a9a9e;
-            --label-gray: #b0b0b5;
-            --unfocused-border: #444446;
-        }
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#09090b"><meta name="apple-mobile-web-app-title" content="角度"><title>角度</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#09090b;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;-webkit-tap-highlight-color:transparent}main{max-width:460px;margin:auto;padding:calc(12px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom))}h1{font-size:20px;margin:2px 0 14px;text-align:center}button,input{font:inherit}button{touch-action:manipulation;cursor:pointer}button:focus-visible{outline:3px solid #fb923c;outline-offset:2px}.panel{background:#18181b;border:2px solid #71717a;border-radius:16px;overflow:hidden}.twocol{display:grid;grid-template-columns:1fr 1fr}.field{position:relative;min-width:0;height:53px;border-bottom:1px solid #3f3f46;display:flex;align-items:center}.twocol .field:first-child{border-right:1px solid #3f3f46}.field.active,.result.active{box-shadow:inset 0 0 0 2px #f97316;background:#27272a}input{min-width:0;width:100%;height:100%;border:0;background:none;color:white;outline:0;text-align:center;font-size:23px;font-weight:700;padding:0 12px;font-variant-numeric:tabular-nums}input::placeholder{font-size:14px;color:#c0c0c0;font-weight:400}.label{font-size:14px;color:#c0c0c0;white-space:nowrap;padding-left:12px;font-weight:700}.unit{font-size:14px;color:#a1a1aa;padding-right:10px}.horizontal input{font-size:26px;padding:0 4px}.keypad{border-top:8px solid #09090b;display:grid;grid-template-columns:1fr;background:#3f3f46;gap:1px}.key-row{display:grid;gap:1px;grid-template-columns:repeat(5,minmax(0,1fr))}.key-row.digits{grid-template-columns:repeat(9,minmax(0,1fr))}.keypad button{padding:0;min-width:0;border:0;background:#18181b;color:white;font-size:23px;font-weight:700;min-height:51px}.keypad button:active{background:#52525b}.keypad .clear{background:#3f3f46}.keypad .enter{background:linear-gradient(#e5e5ea,#c7c7cc);color:#27272a;font-size:30px}.results{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.result{min-width:0;background:#18181b;border:2px solid;border-radius:16px;padding:8px 10px 4px}.result label{display:block;font-size:14px;font-weight:700;color:#d4d4d8}.result>div{display:flex;align-items:center;height:38px}.result input{text-align:left;font-size:28px;padding:0;color:inherit}.result .unit{padding:0}.height{border-color:#22c55e;color:#22c55e}.hyp{border-color:#3b82f6;color:#60a5fa}.preview{background:#18181b;border:1px solid #3f3f46;border-radius:16px;padding:12px;margin-top:14px}.preview-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;font-weight:700}.toggle{border:1px solid #52525b;border-radius:12px;background:#18181b;color:#d4d4d8;padding:4px;min-width:80px;flex-shrink:0}.toggle:active{background:#3f3f46}.toggle svg{display:block;width:70px;height:44px;margin:auto}.toggle span{display:block;font-size:14px;padding:2px 0}.drawing{margin-top:10px;background:#101012;border:1px solid #27272a;border-radius:12px}.drawing svg{display:block;width:100%;height:auto}.note{font-size:14px;color:#a1a1aa;margin:10px 0 0;line-height:1.6}.error{color:#fca5a5;font-size:14px;line-height:1.5;margin:8px 2px 0}.error:empty{display:none}
+.angles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1;min-width:0}.angle{min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px}.angle label{font-size:14px;color:#d4d4d8;font-weight:700;white-space:nowrap}.angle output{font-size:21px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}@media(max-width:359px){.angle output{font-size:18px}.angles{gap:4px}}
 
-        * {
-            box-sizing: border-box;
-            -webkit-text-size-adjust: 100%;
-            -webkit-tap-highlight-color: transparent;
-        }
+.drawing{cursor:zoom-in}.drawing:focus-visible{outline:3px solid #fb923c;outline-offset:2px}
+#fullView{position:fixed;inset:0;width:100%;max-width:none;height:100%;height:100dvh;max-height:none;margin:0;padding:0;border:0;background:#101012;color:#f4f4f5;overscroll-behavior:contain}
+#fullView::backdrop{background:#101012}.full-layout{height:100%;display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top)) calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left))}.full-bar{display:flex;justify-content:space-between;gap:12px;flex-shrink:0}.full-bar button{min-height:44px;min-width:88px;padding:10px 16px;border:1px solid #71717a;border-radius:12px;background:#27272a;color:white;font-size:16px;font-weight:700}.full-canvas{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}.full-canvas svg{width:100%;height:100%;display:block}.full-unit{text-align:right;color:#a1a1aa;font-size:14px;margin:0}
+</style><link rel="manifest" href="./manifest.json?v=20261009-2022">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261009-2022">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261009-2022">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head><body><main><h1>角度</h1>
+<section class="panel" aria-label="勾配と寸法の入力"><div class="twocol"><div class="field active" data-field="y"><input id="y" aria-label="勾配（水平100に対する高さ）" placeholder="勾配(100→↕︎)" readonly inputmode="none"></div><div class="field" data-field="x"><input id="x" aria-label="角度（度）" placeholder="角度" readonly inputmode="none"><span class="unit">°</span></div></div><div class="field horizontal" data-field="c"><label class="label" for="c">水平寸法</label><input id="c" aria-label="水平寸法（ミリメートル）" placeholder="距離・長さ" readonly inputmode="none"><span class="unit">㎜</span></div><div class="keypad" aria-label="テンキー"></div></section>
 
-        body {
-            margin: 0;
-            background: var(--ios-bg);
-            font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        /* ヘッダーエリア */
-        .app-header {
-            padding: 16px 12px 6px;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: baseline;
-            background: var(--ios-bg);
-        }
-        .app-header .title {
-            color: #ffffff;
-            font-size: 19px;
-            font-weight: 500;
-            letter-spacing: -0.2px;
-        }
-        .app-header .subtitle {
-            color: var(--label-gray);
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        /* タブ (固定表示) */
-        .tab-wrapper {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            width: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(15px);
-            padding: 4px 0 8px;
-            display: flex;
-            justify-content: center;
-        }
-
-        .tab-container {
-            display: flex;
-            background: #2c2c2e;
-            width: 92%;
-            max-width: 400px;
-            padding: 2px;
-            border-radius: 10px;
-            border: 1px solid #3a3a3c;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-        }
-
-        .tab-button {
-            flex: 1;
-            padding: 5px 0;
-            background: transparent;
-            color: var(--ios-silver-dark);
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
-            border: 1.5px solid transparent;
-        }
-
-        .tab-button.active {
-            background: #636366;
-            color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .mode-90 #nav-90.active { border-color: var(--accent-90); color: #a2a0ff; }
-        .mode-cheese #nav-cheese.active { border-color: var(--accent-cheese); color: #82c0ff; }
-        .mode-dist #nav-dist.active { border-color: var(--accent-dist); color: #63ff8b; }
-
-        /* スワイプコンテナ */
-        #swipe-container {
-            flex: 1;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            touch-action: pan-y;
-        }
-
-        .main-container {
-            width: 100%;
-            max-width: 420px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 計算結果枠 */
-        .result-box {
-            height: 64px;
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 12px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            transition: background 0.3s, transform 0.1s;
-        }
-        .result-box:active { transform: scale(0.98); }
-
-        .mode-90 .result-box { background: var(--accent-90); }
-        .mode-cheese .result-box { background: var(--accent-cheese); }
-        .mode-dist .result-box { background: var(--accent-dist); }
-
-        /* セルグリッド */
-        .cell-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            background: var(--ios-border);
-            gap: 1px;
-            margin: 0 12px 0;
-            border-radius: 16px 16px 0 0;
-            overflow: hidden;
-            border: 1px solid var(--ios-border);
-            border-bottom: none;
-        }
-
-        .calc-cell {
-            background: #121214;
-            height: 54px;
-            padding: 0 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            border: 0.5px solid var(--unfocused-border);
-        }
-
-        .full-width { grid-column: span 2; }
-
-        .calc-cell.focused {
-            background: #1c1c1e;
-            box-shadow: inset 0 0 0 1.5px var(--ios-orange) !important;
-            border-color: var(--ios-orange);
-            z-index: 10;
-        }
-
-        .input-label-left {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--label-gray);
-            white-space: nowrap;
-        }
-
-        .result-label-left {
-            font-size: 14px;
-            font-weight: 700;
-            color: #ffffff;
-        }
-
-        .input-value {
-            font-size: 26px;
-            font-weight: 700;
-            color: #ffffff;
-            text-align: right;
-            flex: 1;
-        }
-
-        .result-value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #ffffff;
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
-        }
-
-        select.input-value {
-            background: transparent;
-            border: none;
-            outline: none;
-            direction: rtl;
-            width: 100%;
-        }
-
-        #cheese-size { 
-            font-size: 21px !important; 
-            text-align: center;
-            direction: ltr;
-        }
-
-        /* キーパッド */
-        .keypad-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1px;
-            background: var(--ios-border);
-            margin: 0 12px 12px;
-            border-radius: 0 0 16px 16px;
-            overflow: hidden;
-            border: 1px solid var(--ios-border);
-        }
-
-        .key-btn {
-            background: #1c1c1e;
-            color: white;
-            height: 68px;
-            font-size: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.1s;
-        }
-        .key-btn:active { background: #333; }
-        .key-btn.orange { background: var(--ios-orange); font-weight: 700; }
-        .key-btn.gray { background: #2c2c2e; color: var(--label-gray); font-size: 18px; font-weight: 600; }
-
-        /* 履歴・図面 */
-        .history-area { padding: 12px; background: #000; }
-        .history-header {
-            font-size: 15px;
-            font-weight: 700;
-            color: var(--label-gray);
-            margin-bottom: 12px; display: flex; justify-content: space-between;
-        }
-
-        .history-item {
-            background: #111; border-bottom: 1px solid #222;
-            padding: 6px 12px;
-            display: flex; align-items: center; gap: 12px;
-        }
-        .history-item.is-locked { border: 1px solid var(--ios-orange); border-radius: 8px; margin-bottom: 4px; }
-
-        .diagram-container {
-            background: #09090b; padding: 15px; margin: 12px;
-            border: 1px solid var(--ios-border); border-radius: 16px;
-        }
-
-        #toast {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(59, 130, 246, 0.95); color: white;
-            padding: 12px 24px; border-radius: 10px; font-weight: bold;
-            opacity: 0; z-index: 1000; transition: 0.3s; pointer-events: none;
-        }
-        #toast.show { opacity: 1; }
-        .hidden { display: none !important; }
-
-        .padding-bottom {
-            padding-bottom: 40px;
-        }
-    </style>
-</head>
-<body class="mode-90">
-
-    <div id="toast">コピーしました</div>
-
-    <div id="swipe-container">
-        <div class="main-container">
-            <div class="app-header">
-                <span class="title">チーズ管計算</span>
-                <span class="subtitle">KYOWA ROOF</span>
-            </div>
-
-            <div class="tab-wrapper">
-                <div class="tab-container">
-                    <button class="tab-button active" id="nav-90" onclick="switchTab('90')">90°エルボ</button>
-                    <button class="tab-button" id="nav-cheese" onclick="switchTab('cheese')">変形チーズ管</button>
-                    <button class="tab-button" id="nav-dist" onclick="switchTab('dist')">距離計算</button>
-                </div>
-            </div>
-
-            <!-- 90°エルボ -->
-            <div id="section-90">
-                <div class="result-box" onclick="copyResult('elbow-result-val')">
-                    <div class="result-label-left">切寸法</div>
-                    <div class="result-value">
-                        <span id="elbow-result-val">---</span>
-                        <span class="text-xs font-bold opacity-70 ml-1">mm</span>
-                    </div>
-                </div>
-
-                <div class="cell-grid">
-                    <div class="calc-cell">
-                        <span class="input-label-left">サイズ</span>
-                        <select id="elbow-size" class="input-value" onchange="syncAndCalc(this.value)">
-                            <option value="75">75</option>
-                            <option value="100" selected>100</option>
-                            <option value="125">125</option>
-                        </select>
-                    </div>
-                    <div class="calc-cell" style="background: #0d0d0f;">
-                        <span class="input-label-left">重寸法</span>
-                        <span class="input-value text-zinc-600" id="elbow-d-val">--</span>
-                    </div>
-                    <div class="calc-cell full-width focused" id="cell-elbow-input" onclick="focusInput('elbow-input')">
-                        <span class="input-label-left">芯-芯寸法</span>
-                        <div id="elbow-input" class="input-value">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 変形チーズ管 -->
-            <div id="section-cheese" class="hidden">
-                <div class="result-box" onclick="copyResult('cheese-result-val')">
-                    <div class="result-label-left">切寸法</div>
-                    <div class="result-value">
-                        <span id="cheese-result-val">---</span>
-                        <span class="text-xs font-bold opacity-70 ml-1">mm</span>
-                    </div>
-                </div>
-
-                <div class="cell-grid">
-                    <div class="calc-cell">
-                        <select id="cheese-size" class="input-value" onchange="cheeseCalc()">
-                            <option value="10075" selected>100×75</option>
-                            <option value="12575">125×75</option>
-                            <option value="125100">125×100</option>
-                        </select>
-                    </div>
-                    <div class="calc-cell" style="background: #0d0d0f;">
-                        <span class="input-label-left">重寸法</span>
-                        <span class="input-value text-zinc-600" id="cheese-c6-val">--</span>
-                    </div>
-                    <div class="calc-cell full-width" id="cell-cheese-input" onclick="focusInput('cheese-input')">
-                        <span class="input-label-left">芯-芯寸法</span>
-                        <div id="cheese-input" class="input-value">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 距離計算 -->
-            <div id="section-dist" class="hidden">
-                <div class="result-box" onclick="copyResult('dist-result-val')">
-                    <div class="result-label-left">芯-芯寸法</div>
-                    <div class="result-value">
-                        <span id="dist-result-val">---</span>
-                        <span class="text-xs font-bold opacity-70 ml-1">mm</span>
-                    </div>
-                </div>
-
-                <div class="cell-grid">
-                    <div class="calc-cell" id="cell-dist-b" onclick="focusInput('dist-input-b')">
-                        <span class="input-label-left">足長</span>
-                        <div id="dist-input-b" class="input-value">0</div>
-                    </div>
-                    <div class="calc-cell">
-                        <span class="input-label-left">サイズ</span>
-                        <select id="dist-select-x" class="input-value" onchange="syncAndCalc(this.options[this.selectedIndex].text)">
-                            <option value="45">75</option>
-                            <option value="57" selected>100</option>
-                            <option value="70">125</option>
-                        </select>
-                    </div>
-                    <div class="calc-cell" id="cell-dist-h" onclick="focusInput('dist-input-h')">
-                        <span class="input-label-left">直線</span>
-                        <div id="dist-input-h" class="input-value">0</div>
-                    </div>
-                    <div class="calc-cell" id="cell-dist-a" onclick="focusInput('dist-input-a')">
-                        <span class="input-label-left">移動</span>
-                        <div id="dist-input-a" class="input-value">0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- キーパッド -->
-            <div class="keypad-container">
-                <button class="key-btn" onclick="pressKey('7')">7</button>
-                <button class="key-btn" onclick="pressKey('8')">8</button>
-                <button class="key-btn" onclick="pressKey('9')">9</button>
-                <button class="key-btn gray" id="delete-btn-label" onclick="pressKey('backspace')">貼付</button>
-                
-                <button class="key-btn" onclick="pressKey('4')">4</button>
-                <button class="key-btn" onclick="pressKey('5')">5</button>
-                <button class="key-btn" onclick="pressKey('6')">6</button>
-                <button class="key-btn gray" onclick="pressKey('clear')">AC</button>
-                
-                <button class="key-btn" onclick="pressKey('1')">1</button>
-                <button class="key-btn" onclick="pressKey('2')">2</button>
-                <button class="key-btn" onclick="pressKey('3')">3</button>
-                <button class="key-btn orange row-span-2 h-full" id="enter-btn-label" onclick="pressKey('enter')">保存</button>
-                
-                <button class="key-btn" onclick="pressKey('0')">0</button>
-                <button class="key-btn" onclick="pressKey('00')">00</button>
-                <button class="key-btn" id="dot-btn" onclick="pressKey('.')">.</button>
-            </div>
-
-            <div id="dist-diagram-wrapper" class="diagram-container hidden">
-                <svg viewBox="0 0 360 210" class="w-full h-auto" xmlns="http://www.w3.org/2000/svg">
-                    <line x1="100" y1="10" x2="160" y2="10" stroke="white" stroke-width="2" />
-                    <line x1="140" y1="10" x2="140" y2="25" stroke="white" stroke-width="2" />
-                    <circle cx="140" cy="45" r="16.2" fill="none" stroke="white" stroke-width="2" />
-                    <line x1="140" y1="45" x2="280" y2="125" stroke="white" stroke-width="3" />
-                    <rect x="175" y="60" width="80" height="34" rx="6" fill="black" stroke="white" stroke-width="1.5" />
-                    <text id="dist-diagram-result" x="215" y="84" fill="white" font-size="22" font-weight="700" text-anchor="middle">---</text>
-                    <circle cx="280" cy="125" r="16.2" fill="none" stroke="white" stroke-width="2" />
-                    <line x1="100" y1="10" x2="140" y2="10" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
-                    <line x1="100" y1="125" x2="280" y2="125" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
-                    <line x1="100" y1="10" x2="100" y2="125" stroke="#3b82f6" stroke-width="2" />
-                    <line x1="95" y1="10" x2="105" y2="10" stroke="#3b82f6" stroke-width="2" />
-                    <line x1="95" y1="125" x2="105" y2="125" stroke="#3b82f6" stroke-width="2" />
-                    <text x="5" y="75" fill="#3b82f6" font-size="15" font-weight="bold">直線距離</text>
-                    <line x1="140" y1="45" x2="140" y2="155" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
-                    <line x1="280" y1="125" x2="280" y2="155" stroke="#3b82f6" stroke-width="1" opacity="0.5" />
-                    <line x1="140" y1="155" x2="280" y2="155" stroke="#3b82f6" stroke-width="2" />
-                    <line x1="140" y1="150" x2="140" y2="160" stroke="#3b82f6" stroke-width="2" />
-                    <line x1="280" y1="150" x2="280" y2="160" stroke="#3b82f6" stroke-width="2" />
-                    <text x="210" y="195" fill="#3b82f6" font-size="15" font-weight="bold" text-anchor="middle">移動寸法</text>
-                </svg>
-            </div>
-
-            <div id="history-area" class="history-area">
-                <div class="history-header">
-                    <span>履歴</span>
-                    <button onclick="clearHistory()" class="text-red-500">削除</button>
-                </div>
-                <div id="main-history-list"></div>
-            </div>
-
-            <div class="padding-bottom"></div>
-        </div>
-    </div>
-
+<section class="results" aria-label="計算結果・逆算入力"><div class="result height" data-field="a"><label for="a">勾配幅</label><div><input id="a" aria-label="勾配幅（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div><div class="result hyp" data-field="b"><label for="b">斜辺</label><div><input id="b" aria-label="斜辺（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div></section>
+<p id="error" class="error" role="status"></p>
+<section class="preview"><div class="preview-head"><div class="angles" aria-label="A・Bと斜辺の角度"><div class="angle"><label for="angleA">A〜斜辺</label><output id="angleA">—</output></div><div class="angle"><label for="angleB">B〜斜辺</label><output id="angleB">—</output></div></div><button type="button" id="direction" class="toggle" aria-label="下向きに切り替え" aria-pressed="false"><svg id="directionIcon" viewBox="0 0 100 62" aria-hidden="true"></svg><span id="directionLabel">上向き ⇅</span></button></div><div class="drawing" id="openDiagram" role="button" tabindex="0" aria-label="図を全画面で表示" aria-haspopup="dialog"><svg id="diagram" viewBox="0 0 400 205" role="img" aria-label="上向きの勾配図"></svg></div><p class="note">寸法は㎜単位で四捨五入して表示します。</p></section>
+</main>
+<dialog id="fullView" aria-label="勾配図の全画面表示"><div class="full-layout"><div class="full-bar"><button type="button" id="fullDirection">上下切替</button><button type="button" id="closeDiagram" autofocus>閉じる ×</button></div><div class="full-canvas"><svg id="fullDiagram" viewBox="0 0 400 340" role="img" aria-label="角度付き勾配図"></svg></div><p class="full-unit">寸法：㎜</p></div></dialog>
 <script>
-    let currentTab = '90';
-    let focusedInputId = 'elbow-input-90';
-    let isOverwriteMode = true;
-    const storageKey = 'kyowa_unified_calc_v41';
-    const lastTabKey = 'kyowa_last_tab_unified';
-    
-    const inputs = {
-        'elbow-input-90': '',
-        'cheese-input': '',
-        'dist-input-b': '',
-        'dist-input-h': '',
-        'dist-input-a': ''
-    };
-
-    let histories = JSON.parse(localStorage.getItem(storageKey)) || [];
-
-    const elbowData = { 75: { d: 30, e: 88 }, 100: { d: 40, e: 112 }, 125: { d: 50, e: 140 } };
-    const cheeseData = { "10075": { c2: 130, c6: 30 }, "12575": { c2: 144, c6: 30 }, "125100": { c2: 157, c6: 40 } };
-    const distXData = { "75": 45, "100": 57, "125": 70 };
-
-    function syncAndCalc(val) {
-        // サイズの同期 (Elbow / Dist のみ連動させる)
-        document.getElementById('elbow-size').value = val;
-        const distSelect = document.getElementById('dist-select-x');
-        for(let i=0; i<distSelect.options.length; i++) {
-            if(distSelect.options[i].text === val) {
-                distSelect.selectedIndex = i;
-                break;
-            }
-        }
-        
-        elbowCalc();
-        distCalc();
-        // cheeseCalc()は値の変更があれば呼ぶが、サイズは独立
-        cheeseCalc();
-    }
-
-    function focusInput(id) {
-        let internalId = id;
-        if (id === 'elbow-input') internalId = 'elbow-input-90';
-        
-        document.querySelectorAll('.calc-cell').forEach(el => el.classList.remove('focused'));
-        
-        let cellTargetId = id;
-        if (id === 'elbow-input') cellTargetId = 'cell-elbow-input';
-        else if (id === 'cheese-input') cellTargetId = 'cell-cheese-input';
-        else cellTargetId = `cell-${id.replace('input-', '')}`;
-        
-        const target = document.getElementById(cellTargetId);
-        if (target) target.classList.add('focused');
-        
-        focusedInputId = internalId;
-        isOverwriteMode = true;
-    }
-
-    async function pressKey(key) {
-        let val = inputs[focusedInputId] || '';
-
-        if (key === 'clear') {
-            if (currentTab === 'dist') {
-                clearDistFields(); 
-                return;
-            }
-            val = '';
-            isOverwriteMode = false;
-        } else if (key === 'backspace') {
-            if (currentTab === 'dist') {
-                val = ''; 
-            } else {
-                try {
-                    const text = await navigator.clipboard.readText();
-                    const cleanText = text.replace(/[^0-9.]/g, '');
-                    if (cleanText) {
-                        val = cleanText;
-                        isOverwriteMode = false;
-                        showToast("貼り付けました");
-                    } else {
-                        showToast("数値が見つかりません");
-                        return;
-                    }
-                } catch (err) {
-                    showToast("貼り付けに失敗しました");
-                    return;
-                }
-            }
-            isOverwriteMode = false;
-        } else if (key === 'enter') {
-            handleEnter(); return;
-        } else if (key === '.') {
-            if (isOverwriteMode) { val = '0.'; isOverwriteMode = false; }
-            else if (!val.toString().includes('.')) val += val === '' ? '0.' : '.';
-        } else {
-            if (isOverwriteMode) { val = key; isOverwriteMode = false; }
-            else { val = (val === '0') ? key : val + key; }
-        }
-        
-        inputs[focusedInputId] = val;
-        const displayId = focusedInputId.startsWith('elbow-input') ? 'elbow-input' : (focusedInputId.startsWith('cheese-input') ? 'cheese-input' : focusedInputId);
-        updateDisplay(displayId, val);
-        
-        if (currentTab === 'dist') distCalc();
-        else if (currentTab === 'cheese') cheeseCalc();
-        else elbowCalc();
-    }
-
-    function clearDistFields() {
-        ['dist-input-b', 'dist-input-h', 'dist-input-a'].forEach(id => { inputs[id] = ''; updateDisplay(id, ''); });
-        distCalc();
-        isOverwriteMode = true;
-        showToast("すべてクリアしました");
-    }
-
-    function handleEnter() {
-        if (currentTab !== 'dist') saveHistory();
-        else {
-            if (focusedInputId === 'dist-input-h') focusInput('dist-input-a');
-            else if (focusedInputId === 'dist-input-a') focusInput('dist-input-b');
-            else focusInput('dist-input-h');
-        }
-    }
-
-    function updateDisplay(id, val) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.innerText = val === '' ? '0' : formatNum(val);
-        el.style.opacity = val === '' ? '0.3' : '1';
-    }
-
-    function formatNum(num) {
-        if (!num && num !== 0) return "";
-        const parts = num.toString().split(".");
-        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        return parts.join(".");
-    }
-
-    function switchTab(tabId) {
-        currentTab = tabId;
-        localStorage.setItem(lastTabKey, tabId);
-        
-        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-        document.getElementById(`nav-${tabId}`).classList.add('active');
-        document.body.className = `mode-${tabId}`;
-
-        ['section-90', 'section-cheese', 'section-dist'].forEach(s => document.getElementById(s).classList.add('hidden'));
-        document.getElementById(`section-${tabId === 'cheese' ? 'cheese' : (tabId === '90' ? '90' : 'dist')}`).classList.remove('hidden');
-        document.getElementById('dist-diagram-wrapper').classList.toggle('hidden', tabId !== 'dist');
-        document.getElementById('history-area').classList.toggle('hidden', tabId === 'dist');
-        
-        const enterLabel = document.getElementById('enter-btn-label');
-        const deleteBtn = document.getElementById('delete-btn-label');
-
-        if (tabId === 'dist') {
-            enterLabel.innerText = '⏎';
-            deleteBtn.innerText = 'C'; 
-            focusInput('dist-input-h');
-            distCalc();
-        } else {
-            enterLabel.innerText = '保存';
-            deleteBtn.innerText = '貼付'; 
-            const displayId = tabId === '90' ? 'elbow-input' : 'cheese-input';
-            const internalId = tabId === '90' ? 'elbow-input-90' : 'cheese-input';
-            updateDisplay(displayId, inputs[internalId]);
-            focusInput(displayId);
-            tabId === '90' ? elbowCalc() : cheeseCalc();
-            renderHistory();
-        }
-    }
-
-    let startX = 0;
-    const swipeArea = document.getElementById('swipe-container');
-    swipeArea.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive: true});
-    swipeArea.addEventListener('touchend', e => {
-        const diff = e.changedTouches[0].clientX - startX;
-        const tabs = ['90', 'cheese', 'dist'];
-        const idx = tabs.indexOf(currentTab);
-        if (diff > 80 && idx > 0) switchTab(tabs[idx - 1]);
-        else if (diff < -80 && idx < 2) switchTab(tabs[idx + 1]);
-    }, {passive: true});
-
-    function elbowCalc() {
-        const size = document.getElementById('elbow-size').value;
-        const { d, e } = elbowData[size];
-        document.getElementById('elbow-d-val').innerText = d;
-        const c = parseFloat(inputs['elbow-input-90']);
-        const resEl = document.getElementById('elbow-result-val');
-        if (!c) { resEl.innerText = "---"; return; }
-        let res = Math.round((c - ((e * 2) - (d * 2))) * 10) / 10;
-        resEl.innerText = formatNum(res);
-    }
-
-    function cheeseCalc() {
-        const size = document.getElementById('cheese-size').value;
-        const { c2, c6 } = cheeseData[size];
-        document.getElementById('cheese-c6-val').innerText = c6;
-        const c = parseFloat(inputs['cheese-input']);
-        const resEl = document.getElementById('cheese-result-val');
-        if (!c) { resEl.innerText = "---"; return; }
-        let res = Math.round((c - c2) * 10) / 10;
-        resEl.innerText = formatNum(res);
-    }
-
-    function distCalc() {
-        const b = parseFloat(inputs['dist-input-b']) || 0;
-        const h = parseFloat(inputs['dist-input-h']);
-        const a = parseFloat(inputs['dist-input-a']);
-        const distSel = document.getElementById('dist-select-x');
-        const sizeLabel = distSel.options[distSel.selectedIndex].text;
-        const x = distXData[sizeLabel] || parseFloat(distSel.value);
-        
-        const resEl = document.getElementById('dist-result-val');
-        const diagRes = document.getElementById('dist-diagram-result');
-        if (isNaN(h) || isNaN(a)) { resEl.innerText = "---"; diagRes.textContent = "---"; return; }
-        
-        const resultValueNum = Math.ceil(Math.sqrt(Math.pow(h - (b + x), 2) + Math.pow(a, 2)));
-        const resFormatted = formatNum(resultValueNum);
-        
-        resEl.innerText = resFormatted;
-        diagRes.textContent = resFormatted;
-
-        // 【連動機能】他の計算入力欄（数値のみ）に結果を反映
-        inputs['elbow-input-90'] = resultValueNum.toString();
-        inputs['cheese-input'] = resultValueNum.toString();
-        
-        // バックグラウンドで再計算 (サイズはそれぞれの画面の現在の選択を使用)
-        elbowCalc();
-        cheeseCalc();
-    }
-
-    function saveHistory() {
-        const type = currentTab === '90' ? '90' : 'cheese';
-        const inputKey = type === '90' ? 'elbow-input-90' : 'cheese-input';
-        const sizeEl = document.getElementById(type === '90' ? 'elbow-size' : 'cheese-size');
-        const sizeStr = sizeEl.options[sizeEl.selectedIndex].text;
-        const result = document.getElementById(type === '90' ? 'elbow-result-val' : 'cheese-result-val').innerText;
-        
-        if (result === "---" || !inputs[inputKey]) return;
-
-        histories.push({ id: Date.now(), mode: currentTab, size: sizeStr, input: formatNum(inputs[inputKey]), result, locked: false });
-        if (histories.filter(h => !h.locked).length > 12) {
-            const idx = histories.findIndex(h => !h.locked);
-            histories.splice(idx, 1);
-        }
-        localStorage.setItem(storageKey, JSON.stringify(histories));
-        
-        renderHistory();
-        showToast("保存しました");
-        isOverwriteMode = true;
-    }
-
-    function toggleLock(id) {
-        const h = histories.find(x => x.id === id);
-        if (h) { h.locked = !h.locked; localStorage.setItem(storageKey, JSON.stringify(histories)); renderHistory(); }
-    }
-
-    function deleteHistoryItem(id) {
-        histories = histories.filter(h => h.id !== id);
-        localStorage.setItem(storageKey, JSON.stringify(histories));
-        renderHistory();
-        showToast("削除しました");
-    }
-
-    function renderHistory() {
-        if (currentTab === 'dist') return;
-        const list = document.getElementById('main-history-list');
-        list.innerHTML = "";
-        const filtered = histories.filter(h => h.mode === currentTab).reverse();
-        if (!filtered.length) { list.innerHTML = '<div class="text-center py-8 text-zinc-800 text-xs font-bold">履歴なし</div>'; return; }
-        filtered.forEach(h => {
-            const div = document.createElement('div');
-            div.className = `history-item ${h.locked ? 'is-locked' : ''}`;
-            div.innerHTML = `
-                <button onclick="toggleLock(${h.id})" class="p-2 ${h.locked ? 'text-orange-500' : 'text-zinc-600'}">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                </button>
-                <div class="flex-1">
-                    <div class="text-[15px] font-bold text-[var(--ios-silver)] mb-0.5">${h.size} / 芯-芯:${h.input}</div>
-                    <div class="text-xl font-bold">${h.result}</div>
-                </div>
-                ${!h.locked ? `
-                <button onclick="deleteHistoryItem(${h.id})" class="p-2 text-zinc-500">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                </button>
-                ` : '<div class="p-2 w-[36px]"></div>'}
-            `;
-            list.appendChild(div);
-        });
-    }
-
-    function clearHistory() {
-        histories = histories.filter(h => h.locked || h.mode !== currentTab);
-        localStorage.setItem(storageKey, JSON.stringify(histories));
-        renderHistory();
-        showToast("履歴を削除しました");
-    }
-
-    function copyResult(id) { copyRaw(document.getElementById(id).innerText); }
-    function copyRaw(val) {
-        if (val === "---" || val === "エラー") return;
-        const t = document.createElement('textarea');
-        t.value = val.replace(/,/g, '');
-        document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t);
-        showToast("コピーしました");
-    }
-
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.innerText = msg; t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 1000);
-    }
-
-    window.onload = () => { 
-        const lastTab = localStorage.getItem(lastTabKey);
-        if (lastTab && (lastTab === '90' || lastTab === 'cheese' || lastTab === 'dist')) {
-            switchTab(lastTab);
-        } else {
-            focusInput('elbow-input'); 
-            elbowCalc(); 
-            renderHistory();
-        }
-    };
+'use strict';
+const fields=['y','x','c','a','b'];
+let values={y:'',x:'',c:'',a:'',b:''},active='y',fresh=true,down=false,error='';
+const el=id=>document.getElementById(id);
+const num=k=>values[k]===''?null:Number(values[k]);
+const put=(k,n)=>{values[k]=Number.isFinite(n)?String(n):''};
+const fmt=(v,d=0)=>v===''?'':Number(v).toLocaleString('ja-JP',{minimumFractionDigits:d,maximumFractionDigits:d});
+function select(k){if(active!==k){active=k;fresh=true}render()}
+function calculate(k){
+ error='';let n=num(k);
+ if(n===null){if(k==='y'||k==='x'){values.y='';values.x='';values.a='';values.b=''}else if(k==='c'){values.a='';values.b=''}return}
+ if(!Number.isFinite(n)||n<0||n>1e12||(k==='x'&&n>=90)||(['b','c'].includes(k)&&n===0)){
+  error=k==='x'?'角度は0以上90未満で入力してください。':(['b','c'].includes(k)&&n===0)?'水平寸法と斜辺は0より大きい値を入力してください。':'入力できる範囲を超えています。';
+  fields.forEach(f=>{if(f!==k&&f!=='c')values[f]=''});return;
+ }
+ let c=num('c'),a=num('a'),b=num('b'),r=num('y')===null?null:num('y')/100;
+ if(k==='x'||k==='y'){
+  r=k==='x'?Math.tan(n*Math.PI/180):n/100;
+  if(k==='x')put('y',r*100);else put('x',Math.atan(r)*180/Math.PI);
+  if(c!==null&&c>0){put('a',c*r);put('b',Math.hypot(c,c*r))}
+ }else if(k==='c'){
+  if(r!==null){put('a',c*r);put('b',Math.hypot(c,c*r))}
+  else if(a!==null){put('y',a/c*100);put('x',Math.atan2(a,c)*180/Math.PI);put('b',Math.hypot(c,a))}
+  else if(b!==null)solveSides(c,null,b);
+ }else if(c!==null&&c>0){solveSides(c,k==='a'?a:null,k==='b'?b:null)}
+ else if(r!==null){
+  if(k==='a'&&r===0){values.c='';values.b='';error='勾配0では勾配幅から水平寸法を求められません。水平寸法を入力してください。';return}
+  c=k==='a'?a/r:b/Math.hypot(1,r);
+  if(c>0){put('c',c);put('a',c*r);put('b',Math.hypot(c,c*r))}
+ }else if(a!==null&&b!==null){
+  if(b<=a){error='斜辺は勾配幅より大きい値にしてください。';values.c='';values.y='';values.x='';return}
+  solveSides(Math.sqrt((b-a)*(b+a)),a,b);
+ }
+}
+function solveSides(c,a,b){
+ if(a===null){if(b<c){error='斜辺は水平寸法以上の値にしてください。';values.a='';values.y='';values.x='';return}a=Math.sqrt((b-c)*(b+c))}
+ put('c',c);put('a',a);put('b',Math.hypot(c,a));put('y',a/c*100);put('x',Math.atan2(a,c)*180/Math.PI);
+}
+function key(key){
+ if(key==='AC'){values={y:'',x:'',c:'',a:'',b:''};error='';fresh=true;render();return}
+ if(key==='⏎'){active=fields[(fields.indexOf(active)+1)%fields.length];fresh=true;render();return}
+ if(key==='C'){values[active]='';calculate(active);fresh=true;render();return}
+ let s=fresh?'':values[active];
+ if(key==='Backspace')s=s.slice(0,-1);
+ else {if(key==='.'&&s.includes('.'))return;s+=key;if(s.startsWith('.'))s='0'+s;if(s.length>12)return}
+ values[active]=s;fresh=false;calculate(active);render();
+}
+function renderFullDiagram(){
+ const y=num('y'),valid=y!==null&&!error,base=down?140:220,sign=down?1:-1;
+ const h=valid?(y===0?0:Math.max(15,Math.min(100,y))):65,tip=base+sign*h;
+ const text=(x,y,t,color='#f4f4f5',anchor='middle',size=20)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${color}" font-size="${size}" font-weight="700" ${String(t).length>10?'textLength="115" lengthAdjust="spacingAndGlyphs"':''}>${t}</text>`;
+ el('fullDiagram').innerHTML=`<path d="M140 ${base}V35 M20 ${base}H140" stroke="#0785ff" stroke-width="3" stroke-dasharray="9 9" stroke-linecap="round" fill="none"/><g dominant-baseline="middle" stroke="#101012" stroke-width="8" stroke-linejoin="round" paint-order="stroke">${text(140,(base+35)/2,'A','#f4f4f5','middle',23)}${text(80,base,'B','#f4f4f5','middle',23)}</g>${text(160,(base+35)/2+7,el('angleA').textContent,'#f4f4f5','start',23)}${text(80,base+32,el('angleB').textContent,'#f4f4f5','middle',23)}<path d="M140 ${base}H300" stroke="#f97316" stroke-width="4" fill="none"/>${text(220,base-sign*30,fmt(values.c)||'水平寸法','#fb923c')}<path d="M300 ${base}V${tip}" stroke="#22c55e" stroke-width="4" fill="none"/>${text(312,(base+tip)/2+6,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','start',18)}<path d="M140 ${base}L300 ${tip}" stroke="#3b82f6" stroke-width="4" fill="none"/>${text(220,(base+tip)/2+sign*22,valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
+ el('fullDiagram').setAttribute('aria-label',(down?'下向き':'上向き')+'の勾配図、A '+el('angleA').textContent+'、B '+el('angleB').textContent);
+ el('fullDirection').textContent=down?'下向き ⇅':'上向き ⇅';
+}
+function render(){
+ for(const k of fields){el(k).value=k===active&&!fresh?values[k]:fmt(values[k],k==='x'?1:k==='y'?2:0);el(k).style.fontSize=Math.max(14,Math.min(k==='a'||k==='b'?28:23,180/Math.max(1,el(k).value.length)))+'px'}
+ document.querySelectorAll('[data-field]').forEach(n=>n.classList.toggle('active',n.dataset.field===active));el('error').textContent=error;
+ el('direction').setAttribute('aria-pressed',String(down));el('direction').setAttribute('aria-label',down?'上向きに切り替え':'下向きに切り替え');el('directionLabel').textContent=down?'下向き ⇅':'上向き ⇅';
+ el('directionIcon').innerHTML=`<path d="${down?'M12 17H70V47Z':'M12 42H70V12Z'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="40" y="${down?12:59}" text-anchor="middle" fill="currentColor" font-size="16" font-weight="bold">100</text><text x="78" y="${down?36:32}" fill="currentColor" font-size="16" font-weight="bold">y</text>`;
+ const y=num('y'),valid=y!==null&&!error,base=down?64:159,sign=down?1:-1,h=valid?(y===0?0:Math.max(15,Math.min(96,y))):65,tip=base+sign*h;
+ const theta=num('x'),anglesValid=valid&&theta!==null&&Number.isFinite(theta)&&theta>=0&&theta<90;
+ const angleText=n=>Number(n.toFixed(1)).toLocaleString('ja-JP',{maximumFractionDigits:1})+'°';
+ el('angleA').textContent=anglesValid?angleText(90+(down?theta:-theta)):'—';
+ el('angleB').textContent=anglesValid?angleText(180+(down?theta:-theta)):'—';
+ const label=(x,y,t,color,anchor='middle')=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${color}" font-size="18" ${String(t).length>9?'textLength="108" lengthAdjust="spacingAndGlyphs"':''} font-weight="bold">${t}</text>`;
+ el('diagram').setAttribute('aria-label',(down?'下向き':'上向き')+'の勾配図');
+ el('diagram').innerHTML=`<path d="M70 ${base}V18 M10 ${base}H70" stroke="#0785ff" stroke-width="3" stroke-dasharray="9 9" stroke-linecap="round" fill="none"/><g dominant-baseline="middle" stroke="#101012" stroke-width="7" stroke-linejoin="round" paint-order="stroke">${label(70,(base+18)/2,'A','#f4f4f5')}${label(40,base,'B','#f4f4f5')}</g><path d="M70 ${base}H270" stroke="#f97316" stroke-width="4" fill="none"/>${label(170,base-sign*27,fmt(values.c)||'水平寸法','#fb923c')}<path d="M270 ${base}V${tip}" stroke="#22c55e" stroke-width="4" fill="none"/>${label(282,(base+tip)/2+6,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','start')}<path d="M70 ${base}L270 ${tip}" stroke="#3b82f6" stroke-width="4" fill="none"/>${label(170,(base+tip)/2+sign*21,valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
+ renderFullDiagram();
+}
+for(const [rowIndex,keys] of [['C','00','0','⏎','AC'],['1','2','3','4','5','6','7','8','9']].entries()){
+ const row=document.createElement('div');row.className='key-row'+(rowIndex===1?' digits':'');
+ for(const k of keys){
+ const b=document.createElement('button');b.type='button';b.textContent=k;b.className=k==='⏎'?'enter':['AC','C'].includes(k)?'clear':'';if(k==='⏎')b.setAttribute('aria-label','次の入力欄へ');b.addEventListener('click',()=>key(String(k)));row.append(b);
+ }
+ document.querySelector('.keypad').append(row);
+}
+document.querySelectorAll('[data-field]').forEach(n=>{n.addEventListener('click',()=>select(n.dataset.field));n.querySelector('input').addEventListener('focus',()=>select(n.dataset.field))});
+el('direction').addEventListener('click',()=>{down=!down;render()});
+document.addEventListener('keydown',e=>{if(el('fullView').open)return;if(e.ctrlKey||e.metaKey||e.altKey)return;if(e.target.tagName==='BUTTON'&&['Enter',' '].includes(e.key))return;let k=e.key==='Enter'?'⏎':e.key==='Delete'?'C':e.key==='Escape'?'AC':e.key;if(/^[0-9.]$/.test(k)||['⏎','C','AC','Backspace'].includes(k)){e.preventDefault();key(k)}});
+let savedScroll=0,previousBodyStyle='';
+function openDiagram(){
+ if(el('fullView').open)return;
+ savedScroll=window.scrollY;previousBodyStyle=document.body.style.cssText;
+ renderFullDiagram();el('fullView').showModal();
+ document.body.style.position='fixed';document.body.style.top=-savedScroll+'px';document.body.style.width='100%';
+ el('closeDiagram').focus({preventScroll:true});
+}
+el('openDiagram').addEventListener('click',openDiagram);
+el('openDiagram').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();openDiagram()}});
+el('closeDiagram').addEventListener('click',()=>el('fullView').close());
+el('fullView').addEventListener('close',()=>{document.body.style.cssText=previousBodyStyle;window.scrollTo(0,savedScroll);el('openDiagram').focus({preventScroll:true})});
+el('fullDirection').addEventListener('click',()=>{down=!down;render()});
+render();
+</script><script>
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+ let hadController=!!navigator.serviceWorker.controller, reloading=false;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{
+  if(hadController&&!reloading){reloading=true;location.reload()}
+  hadController=true;
+ });
+ window.addEventListener('load',async()=>{
+  try {
+   const registration=await navigator.serviceWorker.register('./sw.js',{scope:'./',updateViaCache:'none'});
+   registration.update().catch(()=>{});
+   document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')registration.update().catch(()=>{})});
+  } catch(error){console.warn('PWA registration failed',error)}
+ });
+}
 </script>
-</body>
-</html>
+</body></html>
