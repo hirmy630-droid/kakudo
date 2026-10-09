@@ -27,24 +27,29 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
  background:linear-gradient(180deg,#151518 0%,#29292d 100%);
  box-shadow:inset 0 2px 5px rgba(0,0,0,.7),inset 0 -1px 0 rgba(255,255,255,.08);
 }
-</style><link rel="manifest" href="./manifest.json?v=20261009-2037">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261009-2037">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261009-2037">
+.full-layout{padding-left:max(4px,env(safe-area-inset-left));padding-right:max(4px,env(safe-area-inset-right))}.full-bar{padding:0 8px}.full-unit{padding-right:8px}
+
+.app-heading{position:relative;display:flex;align-items:center;justify-content:flex-end;min-height:26px;margin:0 0 10px}
+.app-heading h1{font-size:18px;line-height:26px;margin:0;text-align:center}
+.app-heading .brand{position:absolute;left:0;font-size:14px;line-height:26px;font-weight:400;color:#9ca3af;white-space:nowrap}
+</style><link rel="manifest" href="./manifest.json?v=20261009-2100">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261009-2100">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261009-2100">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-</head><body><main><h1>角度</h1>
+</head><body><main><header class="app-heading"><h1>角度</h1><span class="brand">KYOWA ROOF</span></header>
 <section class="panel" aria-label="勾配と寸法の入力"><div class="twocol"><div class="field active" data-field="y"><input id="y" aria-label="勾配（水平100に対する高さ）" placeholder="勾配(100→↕︎)" readonly inputmode="none"></div><div class="field" data-field="x"><input id="x" aria-label="角度（度）" placeholder="角度" readonly inputmode="none"><span class="unit">°</span></div></div><div class="field horizontal" data-field="c"><label class="label" for="c">水平寸法</label><input id="c" aria-label="水平寸法（ミリメートル）" placeholder="距離・長さ" readonly inputmode="none"><span class="unit">㎜</span></div><div class="keypad" aria-label="テンキー"></div></section>
 
 <section class="results" aria-label="計算結果・逆算入力"><div class="result height" data-field="a"><label for="a">勾配幅</label><div><input id="a" aria-label="勾配幅（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div><div class="result hyp" data-field="b"><label for="b">斜辺</label><div><input id="b" aria-label="斜辺（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div></section>
 <p id="error" class="error" role="status"></p>
 <section class="preview"><div class="preview-head"><div class="angles" aria-label="A・Bと斜辺の角度"><div class="angle"><label for="angleA">A〜斜辺</label><output id="angleA">—</output></div><div class="angle"><label for="angleB">B〜斜辺</label><output id="angleB">—</output></div></div><button type="button" id="direction" class="toggle" aria-label="下向きに切り替え" aria-pressed="false"><svg id="directionIcon" viewBox="0 0 100 62" aria-hidden="true"></svg><span id="directionLabel">上向き ⇅</span></button></div><div class="drawing" id="openDiagram" role="button" tabindex="0" aria-label="図を全画面で表示" aria-haspopup="dialog"><svg id="diagram" viewBox="0 0 400 205" role="img" aria-label="上向きの勾配図"></svg></div><p class="note">寸法は㎜単位で四捨五入して表示します。</p></section>
 </main>
-<dialog id="fullView" aria-label="勾配図の全画面表示"><div class="full-layout"><div class="full-bar"><button type="button" id="fullDirection">上下切替</button><button type="button" id="closeDiagram" autofocus>閉じる ×</button></div><div class="full-canvas"><svg id="fullDiagram" viewBox="0 15 440 270" role="img" aria-label="角度付き勾配図"></svg></div><p class="full-unit">寸法：㎜</p></div></dialog>
+<dialog id="fullView" aria-label="勾配図の全画面表示"><div class="full-layout"><div class="full-bar"><button type="button" id="fullDirection">上下切替</button><button type="button" id="closeDiagram" autofocus>閉じる ×</button></div><div class="full-canvas"><svg id="fullDiagram" viewBox="0 0 440 340" role="img" aria-label="角度付き勾配図"></svg></div><p class="full-unit">寸法：㎜</p></div></dialog>
 <script>
 'use strict';
 const fields=['y','x','c','a','b'];
-let values={y:'',x:'',c:'',a:'',b:''},active='y',fresh=true,down=false,error='';
+let values={y:'',x:'',c:'',a:'',b:''},active='y',fresh=true,down=true,error='',editBase=null;
 const el=id=>document.getElementById(id);
 const num=k=>values[k]===''?null:Number(values[k]);
 const put=(k,n)=>{values[k]=Number.isFinite(n)?String(n):''};
@@ -52,12 +57,13 @@ const fmt=(v,d=0)=>v===''?'':Number(v).toLocaleString('ja-JP',{minimumFractionDi
 function select(k){if(active!==k){active=k;fresh=true}render()}
 function calculate(k){
  error='';let n=num(k);
- if(n===null){if(k==='y'||k==='x'){values.y='';values.x='';values.a='';values.b=''}else if(k==='c'){values.a='';values.b=''}return}
+ if(n===null){if(k==='y'||k==='x'){values.y='';values.x='';values.a='';values.b=''}else if(k==='c'){values.a='';values.b=''}else if(k==='a'){values.b=''}else if(k==='b'){values.a=''}return}
  if(!Number.isFinite(n)||n<0||n>1e12||(k==='x'&&n>=90)||(['b','c'].includes(k)&&n===0)){
   error=k==='x'?'角度は0以上90未満で入力してください。':(['b','c'].includes(k)&&n===0)?'水平寸法と斜辺は0より大きい値を入力してください。':'入力できる範囲を超えています。';
   fields.forEach(f=>{if(f!==k&&f!=='c')values[f]=''});return;
  }
  let c=num('c'),a=num('a'),b=num('b'),r=num('y')===null?null:num('y')/100;
+ if(c!==null&&c<=0){error='水平寸法は0より大きい値を入力してください。';if(k!=='a')values.a='';if(k!=='b')values.b='';return}
  if(k==='x'||k==='y'){
   r=k==='x'?Math.tan(n*Math.PI/180):n/100;
   if(k==='x')put('y',r*100);else put('x',Math.atan(r)*180/Math.PI);
@@ -84,16 +90,26 @@ function key(key){
  if(key==='AC'){values={y:'',x:'',c:'',a:'',b:''};error='';fresh=true;render();return}
  if(key==='⏎'){active=fields[(fields.indexOf(active)+1)%fields.length];fresh=true;render();return}
  if(key==='C'){values[active]='';calculate(active);fresh=true;render();return}
+ if(fresh||!editBase)editBase={...values};
  let s=fresh?'':values[active];
  if(key==='Backspace')s=s.slice(0,-1);
  else {if(key==='.'&&s.includes('.'))return;s+=key;if(s.startsWith('.'))s='0'+s;if(s.length>12)return}
- values[active]=s;fresh=false;calculate(active);render();
+ values={...editBase,[active]:s};fresh=false;calculate(active);values[active]=s;render();
 }
 function renderFullDiagram(){
- const y=num('y'),valid=y!==null&&!error,base=down?140:220,sign=down?1:-1;
- const h=valid?(y===0?0:Math.max(15,Math.min(100,y))):65,tip=base+sign*h;
- const text=(x,y,t,color='#f4f4f5',anchor='middle',size=20)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${color}" font-size="${size}" font-weight="700" ${String(t).length>10?'textLength="115" lengthAdjust="spacingAndGlyphs"':''}>${t}</text>`;
- el('fullDiagram').innerHTML=`<path d="M140 ${base}V35 M20 ${base}H140" stroke="#0785ff" stroke-width="3" stroke-dasharray="9 9" stroke-linecap="round" fill="none"/><g dominant-baseline="middle" stroke="#101012" stroke-width="8" stroke-linejoin="round" paint-order="stroke">${text(140,(base+35)/2,'A','#f4f4f5','middle',23)}${text(80,base,'B','#f4f4f5','middle',23)}</g>${text(160,(base+35)/2+7,el('angleA').textContent,'#f4f4f5','start',23)}${text(80,base+32,el('angleB').textContent,'#f4f4f5','middle',23)}<path d="M140 ${base}H300" stroke="#f97316" stroke-width="4" fill="none"/>${text(220,base-sign*30,fmt(values.c)||'水平寸法','#fb923c')}<path d="M300 ${base}V${tip}" stroke="#22c55e" stroke-width="4" fill="none"/>${text(312,(base+tip)/2+6,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','start',18)}<path d="M140 ${base}L300 ${tip}" stroke="#3b82f6" stroke-width="4" fill="none"/>${text(220,(base+tip)/2+sign*22,valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
+ const y=num('y'),valid=y!==null&&!error,base=down?130:260,sign=down?1:-1;
+ const h=valid?(y===0?0:Math.max(40,Math.min(140,y*2.9))):95,tip=base+sign*h;
+ const text=(x,y,t,color='#f4f4f5',anchor='middle',size=22,maxWidth=140)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${color}" font-size="${size}" font-weight="700" stroke="#101012" stroke-width="5" stroke-linejoin="round" paint-order="stroke" ${String(t).length*size*.65>maxWidth?'textLength="'+maxWidth+'" lengthAdjust="spacingAndGlyphs"':''}>${t}</text>`;
+ el('fullDiagram').innerHTML=`<path d="M70 ${base}V20 M8 ${base}H70" stroke="#0785ff" stroke-width="3" stroke-dasharray="9 9" stroke-linecap="round" fill="none"/>
+ <g dominant-baseline="middle">${text(70,52,'A')}${text(35,base,'B')}</g>
+ ${text(93,59,el('angleA').textContent,'#f4f4f5','start',24,115)}
+ ${text(42,base+35,el('angleB').textContent,'#f4f4f5','middle',22,78)}
+ <path d="M70 ${base}H360" stroke="#f97316" stroke-width="4" fill="none"/>
+ ${text(235,base-sign*28,fmt(values.c)||'水平寸法','#fb923c')}
+ <path d="M360 ${base}V${tip}" stroke="#22c55e" stroke-width="4" fill="none"/>
+ ${text(360,tip+sign*32,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','middle',22,135)}
+ <path d="M70 ${base}L360 ${tip}" stroke="#3b82f6" stroke-width="4" fill="none"/>
+ ${text(225,(base+tip)/2+sign*32,valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
  el('fullDiagram').setAttribute('aria-label',(down?'下向き':'上向き')+'の勾配図、A '+el('angleA').textContent+'、B '+el('angleB').textContent);
  el('fullDirection').textContent=down?'下向き ⇅':'上向き ⇅';
 }
