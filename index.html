@@ -32,14 +32,20 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
 .app-heading{position:relative;display:flex;align-items:flex-end;justify-content:space-between;min-height:26px;margin:0 0 10px;gap:12px}
 .app-heading h1{font-size:18px;line-height:26px;margin:0;text-align:left}
 .app-heading .brand{position:static;font-size:14px;line-height:20px;font-weight:400;color:#9ca3af;white-space:nowrap;align-self:flex-end}
-</style><link rel="manifest" href="./manifest.json?v=20261009-2119">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261009-2119">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261009-2119">
+
+#slopePlaceholder{position:static;transform:none;order:-1;width:64px;height:46px;flex:0 0 64px;margin-left:8px;color:#d4d4d8;pointer-events:none}
+#angleFieldLabel{font-size:14px;font-weight:700;color:#c0c0c0;flex-shrink:0;margin-left:10px;white-space:nowrap}
+#slopePlaceholder[hidden],#angleFieldLabel[hidden]{display:none}
+.twocol .field input{flex:1;width:0;padding-left:6px;padding-right:6px}
+
+</style><link rel="manifest" href="./manifest.json?v=20261010-0050">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0050">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0050">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head><body><main><header class="app-heading"><h1>角度</h1><span class="brand">KYOWA ROOF</span></header>
-<section class="panel" aria-label="勾配と寸法の入力"><div class="twocol"><div class="field active" data-field="y"><input id="y" aria-label="勾配（水平100に対する高さ）" placeholder="勾配(100→↕︎)" readonly inputmode="none"></div><div class="field" data-field="x"><input id="x" aria-label="角度（度）" placeholder="角度" readonly inputmode="none"><span class="unit">°</span></div></div><div class="field horizontal" data-field="c"><label class="label" for="c">水平寸法</label><input id="c" aria-label="水平寸法（ミリメートル）" placeholder="距離・長さ" readonly inputmode="none"><span class="unit">㎜</span></div><div class="keypad" aria-label="テンキー"></div></section>
+<section class="panel" aria-label="勾配と寸法の入力"><div class="twocol"><div class="field active" data-field="y"><input id="y" aria-label="勾配（水平100に対する高さ）" placeholder="" readonly inputmode="none"><svg id="slopePlaceholder" viewBox="0 0 100 62" aria-hidden="true"></svg></div><div class="field" data-field="x"><label id="angleFieldLabel" for="x">角度</label><input id="x" aria-label="角度（度）" placeholder="" readonly inputmode="none"></div></div><div class="field horizontal" data-field="c"><label class="label" for="c">水平寸法</label><input id="c" aria-label="水平寸法（ミリメートル）" placeholder="距離・長さ" readonly inputmode="none"><span class="unit">㎜</span></div><div class="keypad" aria-label="テンキー"></div></section>
 
 <section class="results" aria-label="計算結果・逆算入力"><div class="result height" data-field="a"><label for="a">勾配幅</label><div><input id="a" aria-label="勾配幅（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div><div class="result hyp" data-field="b"><label for="b">斜辺</label><div><input id="b" aria-label="斜辺（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div></section>
 <p id="error" class="error" role="status"></p>
@@ -87,6 +93,7 @@ function solveSides(c,a,b){
  put('c',c);put('a',a);put('b',Math.hypot(c,a));put('y',a/c*100);put('x',Math.atan2(a,c)*180/Math.PI);
 }
 function key(key){
+ if(active==='y'&&key==='.')return;
  if(key==='AC'){values={y:'',x:'',c:'',a:'',b:''};error='';fresh=true;render();return}
  if(key==='⏎'){active=fields[(fields.indexOf(active)+1)%fields.length];fresh=true;render();return}
  if(key==='C'){values[active]='';calculate(active);fresh=true;render();return}
@@ -114,20 +121,28 @@ function renderFullDiagram(){
  el('fullDirection').textContent=down?'下向き ⇅':'上向き ⇅';
 }
 function fitInput(input,maxSize){
- const style=getComputedStyle(input),width=input.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+ const fieldLabel=input.id==='y'?el('slopePlaceholder'):input.id==='x'?el('angleFieldLabel'):null;
+ if(fieldLabel)fieldLabel.hidden=false;
+ const style=getComputedStyle(input),padding=parseFloat(style.paddingLeft)+parseFloat(style.paddingRight);
+ let width=input.clientWidth-padding;
  if(width<=0)return;
  const canvas=fitInput.canvas||(fitInput.canvas=document.createElement('canvas')),context=canvas.getContext('2d');
  if(!context)return;
  context.font=style.fontWeight+' '+maxSize+'px '+style.fontFamily;
  const measured=context.measureText(input.value||'0').width;
+ if(fieldLabel&&input.value!==''&&measured>width-4){
+  fieldLabel.hidden=true;
+  width=input.clientWidth-padding;
+ }
  input.style.fontSize=Math.max(16,Math.min(maxSize,maxSize*(width-4)/Math.max(1,measured)))+'px';
 }
 window.addEventListener('resize',()=>{for(const k of fields)fitInput(el(k),k==='a'||k==='b'?28:k==='c'?26:23)});
 function render(){
- for(const k of fields){el(k).value=k===active&&!fresh?values[k]:fmt(values[k],k==='x'?1:k==='y'?2:0);fitInput(el(k),k==='a'||k==='b'?28:k==='c'?26:23)}
+ for(const k of fields){el(k).value=k===active&&!fresh?values[k]:fmt(values[k],k==='x'?1:0);fitInput(el(k),k==='a'||k==='b'?28:k==='c'?26:23)}
  document.querySelectorAll('[data-field]').forEach(n=>n.classList.toggle('active',n.dataset.field===active));el('error').textContent=error;
  el('direction').setAttribute('aria-pressed',String(down));el('direction').setAttribute('aria-label',down?'上向きに切り替え':'下向きに切り替え');el('directionLabel').textContent=down?'下向き ⇅':'上向き ⇅';
  el('directionIcon').innerHTML=`<path d="${down?'M12 17H70V47Z':'M12 42H70V12Z'}" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><text x="40" y="${down?12:59}" text-anchor="middle" fill="currentColor" font-size="16" font-weight="bold">100</text><text x="78" y="${down?36:32}" fill="currentColor" font-size="16" font-weight="bold">y</text>`;
+ el('slopePlaceholder').innerHTML=el('directionIcon').innerHTML;
  const y=num('y'),valid=y!==null&&!error,base=down?64:159,sign=down?1:-1,h=valid?(y===0?0:Math.max(15,Math.min(96,y))):65,tip=base+sign*h;
  const theta=num('x'),anglesValid=valid&&theta!==null&&Number.isFinite(theta)&&theta>=0&&theta<90;
  const angleText=n=>Number(n.toFixed(1)).toLocaleString('ja-JP',{maximumFractionDigits:1})+'°';
