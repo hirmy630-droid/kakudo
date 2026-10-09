@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#09090b"><meta name="apple-mobile-web-app-title" content="角度"><title>角度</title>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#09090b"><meta name="apple-mobile-web-app-title" content="角度"><title>角度</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#09090b;color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;-webkit-tap-highlight-color:transparent}main{max-width:460px;margin:auto;padding:calc(12px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom))}h1{font-size:20px;margin:2px 0 14px;text-align:center}button,input{font:inherit}button{touch-action:manipulation;cursor:pointer}button:focus-visible{outline:3px solid #fb923c;outline-offset:2px}.panel{background:#18181b;border:2px solid #71717a;border-radius:16px;overflow:hidden}.twocol{display:grid;grid-template-columns:1fr 1fr}.field{position:relative;min-width:0;height:53px;border-bottom:1px solid #3f3f46;display:flex;align-items:center}.twocol .field:first-child{border-right:1px solid #3f3f46}.field.active,.result.active{box-shadow:inset 0 0 0 2px #f97316;background:#27272a}input{min-width:0;width:100%;height:100%;border:0;background:none;color:white;outline:0;text-align:center;font-size:23px;font-weight:700;padding:0 12px;font-variant-numeric:tabular-nums}input::placeholder{font-size:14px;color:#c0c0c0;font-weight:400}.label{font-size:14px;color:#c0c0c0;white-space:nowrap;padding-left:12px;font-weight:700}.unit{font-size:14px;color:#a1a1aa;padding-right:10px}.horizontal input{font-size:26px;padding:0 4px}.keypad{border-top:8px solid #09090b;display:grid;grid-template-columns:1fr;background:#3f3f46;gap:1px}.key-row{display:grid;gap:1px;grid-template-columns:repeat(6,minmax(0,1fr))}.key-row.digits{grid-template-columns:repeat(9,minmax(0,1fr))}.keypad button{padding:0;min-width:0;border:0;background:#18181b;color:white;font-size:23px;font-weight:700;min-height:51px}.keypad button:active{background:#52525b}.keypad .clear{background:#3f3f46}.keypad .enter{background:linear-gradient(#e5e5ea,#c7c7cc);color:#27272a;font-size:30px}.results{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.result{min-width:0;background:#18181b;border:2px solid;border-radius:16px;padding:8px 10px 4px}.result label{display:block;font-size:14px;font-weight:700;color:#d4d4d8}.result>div{display:flex;align-items:center;height:38px}.result input{text-align:left;font-size:28px;padding:0;color:inherit}.result .unit{padding:0}.height{border-color:#22c55e;color:#22c55e}.hyp{border-color:#3b82f6;color:#60a5fa}.preview{background:#18181b;border:1px solid #3f3f46;border-radius:16px;padding:12px;margin-top:14px}.preview-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;font-weight:700}.toggle{border:1px solid #52525b;border-radius:12px;background:#18181b;color:#d4d4d8;padding:4px;min-width:80px;flex-shrink:0}.toggle:active{background:#3f3f46}.toggle svg{display:block;width:70px;height:44px;margin:auto}.toggle span{display:block;font-size:14px;padding:2px 0}.drawing{margin-top:10px;background:#101012;border:1px solid #27272a;border-radius:12px}.drawing svg{display:block;width:100%;height:auto}.note{font-size:14px;color:#a1a1aa;margin:10px 0 0;line-height:1.6}.error{color:#fca5a5;font-size:14px;line-height:1.5;margin:8px 2px 0}.error:empty{display:none}
 .angles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;flex:1;min-width:0}.angle{min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px}.angle label{font-size:14px;color:#d4d4d8;font-weight:700;white-space:nowrap}.angle output{font-size:21px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}@media(max-width:359px){.angle output{font-size:18px}.angles{gap:4px}}
@@ -40,11 +40,13 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
 
 
 .horizontal #c{height:100%;padding-top:0;padding-bottom:0;line-height:normal}
-.horizontal #c:placeholder-shown{font-size:14px!important}
+.horizontal #c:placeholder-shown{font-size:16px!important}
 .horizontal #c::placeholder{color:#71717a;opacity:1;line-height:normal}
-</style><link rel="manifest" href="./manifest.json?v=20261010-0105">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0105">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0105">
+
+html,body,main,#fullView{touch-action:pan-x pan-y}
+</style><link rel="manifest" href="./manifest.json?v=20261010-0127">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0127">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0127">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -58,8 +60,16 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
 <dialog id="fullView" aria-label="勾配図の全画面表示"><div class="full-layout"><div class="full-bar"><button type="button" id="fullDirection">上下切替</button><button type="button" id="closeDiagram" autofocus>閉じる ×</button></div><div class="full-canvas"><svg id="fullDiagram" viewBox="0 0 440 340" role="img" aria-label="角度付き勾配図"></svg></div><p class="full-unit">寸法：㎜</p></div></dialog>
 <script>
 'use strict';
+// Suppress multi-touch page zoom while preserving one-finger scrolling.
+for(const type of ['gesturestart','gesturechange','gestureend']){
+ document.addEventListener(type,e=>e.preventDefault(),{passive:false});
+}
+for(const type of ['touchstart','touchmove']){
+ document.addEventListener(type,e=>{if(e.touches.length>1)e.preventDefault()},{passive:false});
+}
+
 const fields=['y','x','c','a','b'];
-let values={y:'',x:'',c:'',a:'',b:''},active='y',fresh=true,down=true,error='',editBase=null;
+let values={y:'',x:'',c:'100',a:'',b:''},active='y',fresh=true,down=true,error='',editBase=null;
 const STORAGE_KEY='kyowa-angle:state:v1:'+new URL('./',location.href).pathname;
 function saveState(){
  try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:1,values,active,down,error}))}
@@ -119,7 +129,7 @@ function solveSides(c,a,b){
 }
 function key(key){
  if(active==='y'&&key==='.')return;
- if(key==='AC'){values={y:'',x:'',c:'',a:'',b:''};active='y';down=true;error='';fresh=true;editBase=null;render();return}
+ if(key==='AC'){values={y:'',x:'',c:'100',a:'',b:''};active='y';down=true;error='';fresh=true;editBase=null;render();return}
  if(key==='⏎'){active=fields[(fields.indexOf(active)+1)%fields.length];fresh=true;render();return}
  if(key==='C'){values[active]='';calculate(active);fresh=true;render();return}
  if(fresh||!editBase)editBase={...values};
@@ -163,6 +173,7 @@ function fitInput(input,maxSize){
 }
 window.addEventListener('resize',()=>{for(const k of fields)fitInput(el(k),k==='a'||k==='b'?28:k==='c'?26:23)});
 function render(){
+ el('c').style.color=num('c')===100?'#fb923c':'#ffffff';
  for(const k of fields){el(k).value=k===active&&!fresh?values[k]:fmt(values[k],k==='x'?1:0);fitInput(el(k),k==='a'||k==='b'?28:k==='c'?26:23)}
  document.querySelectorAll('[data-field]').forEach(n=>n.classList.toggle('active',n.dataset.field===active));el('error').textContent=error;
  el('direction').setAttribute('aria-pressed',String(down));el('direction').setAttribute('aria-label',down?'上向きに切り替え':'下向きに切り替え');el('directionLabel').textContent=down?'下向き ⇅':'上向き ⇅';
@@ -187,6 +198,8 @@ for(const [rowIndex,keys] of [['AC','.','00','0','⏎','C'],['1','2','3','4','5'
  document.querySelector('.keypad').append(row);
 }
 document.querySelectorAll('[data-field]').forEach(n=>{n.addEventListener('click',()=>select(n.dataset.field));n.querySelector('input').addEventListener('focus',()=>select(n.dataset.field))});
+// Custom keypad: select the field without focusing the native text input.
+el('c').addEventListener('pointerdown',e=>{e.preventDefault();select('c')});
 el('direction').addEventListener('click',()=>{down=!down;render()});
 document.addEventListener('keydown',e=>{if(el('fullView').open)return;if(e.ctrlKey||e.metaKey||e.altKey)return;if(e.target.tagName==='BUTTON'&&['Enter',' '].includes(e.key))return;let k=e.key==='Enter'?'⏎':e.key==='Delete'?'C':e.key==='Escape'?'AC':e.key;if(/^[0-9.]$/.test(k)||['⏎','C','AC','Backspace'].includes(k)){e.preventDefault();key(k)}});
 let savedScroll=0,previousBodyStyle='';

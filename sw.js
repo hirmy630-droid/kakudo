@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='20261010-0105';
+const VERSION='20261010-0127';
 const PREFIX='angle-pwa:'+self.registration.scope+':';
 const CACHE=PREFIX+VERSION;
 const url=path=>new URL(path,self.registration.scope).href;
