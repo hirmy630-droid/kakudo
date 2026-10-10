@@ -44,9 +44,15 @@ h1{margin:0 0 10px}.field{height:52px}.horizontal input{flex:1;width:0}.label,.u
 .horizontal #c::placeholder{color:#71717a;opacity:1;line-height:normal}
 
 html,body,main,#fullView{touch-action:pan-x pan-y}
-</style><link rel="manifest" href="./manifest.json?v=20261010-0158">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0158">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0158">
+
+.full-bar{order:3;padding-top:10px;gap:12px}.full-canvas{order:1}.full-unit{order:2}.full-bar button{flex:1}
+#numberEditor{width:min(360px,calc(100% - 20px));max-height:calc(100dvh - 20px);overflow:auto;border:1px solid #71717a;border-radius:16px;padding:14px;background:#18181b;color:#fff}
+#numberEditor::backdrop{background:rgba(0,0,0,.65)}#numberEditor h2{font-size:18px;margin:0 0 10px}#editorValue{display:block;background:#09090b;min-height:48px;border-radius:8px;padding:8px;text-align:right;font-size:26px;overflow-wrap:anywhere}
+.editor-keys{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:10px}.editor-keys button,.editor-actions button{min-height:44px;border:1px solid #52525b;background:#303034;color:#fff;font-size:20px;border-radius:6px}.editor-actions{display:flex;gap:8px;margin-top:10px}.editor-actions button{flex:1;font-size:16px}#editorApply{background:#b85c00}.editor-note{font-size:14px;color:#a1a1aa;margin:8px 0}#editorError{font-size:14px;color:#fca5a5;margin:8px 0}
+#fullDiagram [data-edit]{cursor:pointer}#fullDiagram [data-edit]:focus-visible{outline:2px solid #fb923c}
+</style><link rel="manifest" href="./manifest.json?v=20261010-0941">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0941">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0941">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -57,7 +63,8 @@ html,body,main,#fullView{touch-action:pan-x pan-y}
 <p id="error" class="error" role="status"></p>
 <section class="preview"><div class="preview-head"><div class="angles" aria-label="A・Bと斜辺の角度"><div class="angle"><label for="angleA">A〜斜辺</label><output id="angleA">—</output></div><div class="angle"><label for="angleB">B〜斜辺</label><output id="angleB">—</output></div></div><button type="button" id="direction" class="toggle" aria-label="下向きに切り替え" aria-pressed="false"><svg id="directionIcon" viewBox="0 0 100 62" aria-hidden="true"></svg><span id="directionLabel">上向き ⇅</span></button></div><div class="drawing" id="openDiagram" role="button" tabindex="0" aria-label="図を全画面で表示" aria-haspopup="dialog"><svg id="diagram" viewBox="0 0 400 205" role="img" aria-label="上向きの勾配図"></svg></div><p class="note">寸法は㎜単位で四捨五入して表示します。</p></section>
 </main>
-<dialog id="fullView" aria-label="勾配図の全画面表示"><div class="full-layout"><div class="full-bar"><button type="button" id="fullDirection">上下切替</button><button type="button" id="closeDiagram" autofocus>閉じる ×</button></div><div class="full-canvas"><svg id="fullDiagram" viewBox="0 0 440 340" role="img" aria-label="角度付き勾配図"></svg></div><p class="full-unit">寸法：㎜</p></div></dialog>
+<dialog id="fullView" aria-label="勾配図の全画面表示"><div class="full-layout"><div class="full-bar"><button type="button" id="fullDirection">上下切替</button><button type="button" id="closeDiagram" autofocus>閉じる ×</button></div><div class="full-canvas"><svg id="fullDiagram" viewBox="0 0 440 340" role="img" aria-label="角度付き勾配図"></svg></div><p class="full-unit">数字をタップして変更　寸法：㎜</p></div></dialog>
+<dialog id="numberEditor" aria-labelledby="editorTitle"><h2 id="editorTitle">数値変更</h2><output id="editorValue"></output><p id="editorMode" class="editor-note"></p><div id="editorKeys" class="editor-keys"></div><p id="editorError" role="status"></p><div class="editor-actions"><button type="button" id="editorCancel">キャンセル</button><button type="button" id="editorApply">確定</button></div></dialog>
 <script>
 'use strict';
 // Suppress multi-touch page zoom while preserving one-finger scrolling.
@@ -152,16 +159,21 @@ function renderFullDiagram(){
  const y=num('y'),valid=y!==null&&!error,base=down?130:260,sign=down?1:-1;
  const h=valid?(y===0?0:Math.max(40,Math.min(140,y*2.9))):95,tip=base+sign*h;
  const text=(x,y,t,color='#f4f4f5',anchor='middle',size=22,maxWidth=140)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${color}" font-size="${size}" font-weight="700" stroke="#101012" stroke-width="5" stroke-linejoin="round" paint-order="stroke" ${String(t).length*size*.65>maxWidth?'textLength="'+maxWidth+'" lengthAdjust="spacingAndGlyphs"':''}>${t}</text>`;
+ const editable=(field,x,y,t,color='#f4f4f5',anchor='middle',size=22,maxWidth=140)=>{
+ const width=Math.min(maxWidth,Math.max(48,String(t).length*size*.65));
+ const left=anchor==='start'?x-5:x-width/2-5;
+ return `<g data-edit="${field}" role="button" tabindex="0" aria-label="${({c:'水平寸法',a:'勾配幅',b:'斜辺',A:'Aの角度',B:'Bの角度'})[field]}を変更"><rect x="${left}" y="${y-28}" width="${width+10}" height="44" fill="transparent"/>${text(x,y,t,color,anchor,size,maxWidth)}</g>`;
+ };
  el('fullDiagram').innerHTML=`<path d="M70 ${base}V20 M8 ${base}H70" stroke="#0785ff" stroke-width="3" stroke-dasharray="9 9" stroke-linecap="round" fill="none"/>
  <g dominant-baseline="middle">${text(70,52,'A')}${text(35,base,'B')}</g>
- ${text(93,59,el('angleA').textContent,'#f4f4f5','start',24,115)}
- ${text(42,base+35,el('angleB').textContent,'#f4f4f5','middle',22,78)}
+ ${editable('A',93,59,el('angleA').textContent,'#f4f4f5','start',24,115)}
+ ${editable('B',42,base+35,el('angleB').textContent,'#f4f4f5','middle',22,78)}
  <path d="M70 ${base}H360" stroke="#f97316" stroke-width="4" fill="none"/>
- ${text(235,base-sign*28,fmt(values.c)||'水平寸法','#fb923c')}
+ ${editable('c',235,base-sign*28,fmt(values.c)||'水平寸法','#fb923c')}
  <path d="M360 ${base}V${tip}" stroke="#22c55e" stroke-width="4" fill="none"/>
- ${text(360,tip+sign*32,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','middle',22,135)}
+ ${editable('a',360,tip+sign*32,valid?(fmt(values.a)||'—'):'勾配幅','#4ade80','middle',22,135)}
  <path d="M70 ${base}L360 ${tip}" stroke="#3b82f6" stroke-width="4" fill="none"/>
- ${text(225,(base+tip)/2+sign*32,valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
+ ${editable('b',215,(base+tip)/2+(down?42+70*h/290:-(22+70*h/290)),valid?(fmt(values.b)||'—'):'斜辺','#60a5fa')}`;
  el('fullDiagram').setAttribute('aria-label',(down?'下向き':'上向き')+'の勾配図、A '+el('angleA').textContent+'、B '+el('angleB').textContent);
  el('fullDirection').textContent=down?'下向き ⇅':'上向き ⇅';
 }
@@ -214,6 +226,48 @@ document.querySelectorAll('[data-field]').forEach(n=>{n.addEventListener('click'
 el('c').addEventListener('pointerdown',e=>{e.preventDefault();select('c')});
 el('direction').addEventListener('click',()=>{down=!down;render()});
 document.addEventListener('keydown',e=>{if(el('fullView').open)return;if(e.ctrlKey||e.metaKey||e.altKey)return;if(e.target.tagName==='BUTTON'&&['Enter',' '].includes(e.key))return;let k=e.key==='Enter'?'⏎':e.key==='Delete'?'C':e.key==='Escape'?'AC':e.key;if(/^[0-9.]$/.test(k)||['⏎','C','AC','Backspace'].includes(k)){e.preventDefault();key(k)}});
+
+let editorField='c',editorDraft='',editorFresh=true;
+function openNumberEditor(field){
+ editorField=field;editorFresh=true;
+ const v=field==='A'||field==='B'?el(field==='A'?'angleA':'angleB').textContent.replace('°',''):values[field];
+ editorDraft=v&&v!=='—'?String(Number(Number(v).toFixed(6))):'';
+ el('editorTitle').textContent=({c:'水平寸法（㎜）',a:'勾配幅（㎜）',b:'斜辺（㎜）',A:'Aの角度（°）',B:'Bの角度（°）'})[field];
+ el('editorValue').textContent=editorDraft||'—';el('editorError').textContent='';
+ el('editorMode').textContent=fixedMode==='angle'?'角度固定':'水平寸法固定';
+ el('numberEditor').showModal();
+}
+function editorKey(k){
+ if(k==='C'){editorDraft='';editorFresh=false}
+ else if(k==='⌫'){editorDraft=editorDraft.slice(0,-1);editorFresh=false}
+ else{
+  let next=editorFresh?'':editorDraft;if(k==='.'&&next.includes('.'))return;
+  next+=k;if(next.startsWith('.'))next='0'+next;if(next.length>12)return;
+  editorDraft=next;editorFresh=false;
+ }
+ el('editorValue').textContent=editorDraft||'—';el('editorError').textContent='';
+}
+function applyNumberEditor(){
+ if(editorFresh){el('numberEditor').close();return}
+ if(!/^\d+(?:\.\d*)?$/.test(editorDraft)){el('editorError').textContent='数値を入力してください。';return}
+ let n=Number(editorDraft),field=editorField;
+ if(field==='A'||field==='B'){
+  n=field==='A'?(down?n-90:90-n):(down?n-180:180-n);field='x';
+  if(n<0||n>=90){el('editorError').textContent='この向きで成立する角度を入力してください。';return}
+ }
+ const before={...values},beforeError=error;
+ values[field]=String(n);calculate(field);
+ if(error){const message=error;values=before;error=beforeError;el('editorError').textContent=message;return}
+ active=field;fresh=true;editBase=null;render();el('numberEditor').close();
+}
+for(const k of ['7','8','9','4','5','6','1','2','3','.','0','00','C','⌫']){
+ const b=document.createElement('button');b.type='button';b.textContent=k;b.addEventListener('click',()=>editorKey(k));el('editorKeys').append(b);
+}
+el('fullDiagram').addEventListener('click',e=>{const target=e.target.closest('[data-edit]');if(target)openNumberEditor(target.dataset.edit)});
+el('fullDiagram').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const target=e.target.closest('[data-edit]');if(target){e.preventDefault();openNumberEditor(target.dataset.edit)}}});
+el('editorCancel').addEventListener('click',()=>el('numberEditor').close());
+el('editorApply').addEventListener('click',applyNumberEditor);
+el('numberEditor').addEventListener('keydown',e=>{if(e.key==='Escape')return;if(e.target.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;if(/^[0-9.]$/.test(e.key)){e.preventDefault();editorKey(e.key)}else if(e.key==='Backspace'){e.preventDefault();editorKey('⌫')}else if(e.key==='Enter'){e.preventDefault();applyNumberEditor()}});
 let savedScroll=0,previousBodyStyle='';
 function openDiagram(){
  if(el('fullView').open)return;
