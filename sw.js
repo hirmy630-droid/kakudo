@@ -1,8 +1,9 @@
-const CACHE_PREFIX = 'slope-angle-pwa-cache-';
-const CACHE_NAME = `${CACHE_PREFIX}20261010-1608`;
-const APP_BASE = new URL('./', self.location.href);
-const APP_BASE_PATH = APP_BASE.pathname;
-const INDEX_URL = new URL('index.html', APP_BASE).href;
+'use strict';
+const VERSION = '20261010-1630';
+const PREFIX = 'angle-pwa:' + self.registration.scope + ':';
+const CACHE_NAME = PREFIX + VERSION;
+const APP_BASE_PATH = new URL('./', self.registration.scope).pathname;
+const INDEX_URL = new URL('./index.html', self.registration.scope).href;
 const INDEX_PATH = new URL(INDEX_URL).pathname;
 
 self.addEventListener('install', event => {
@@ -19,7 +20,7 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const names = await caches.keys();
     await Promise.all(names
-      .filter(name => name.startsWith(CACHE_PREFIX) && name !== CACHE_NAME)
+      .filter(name => name.startsWith(PREFIX) && name !== CACHE_NAME)
       .map(name => caches.delete(name)));
     await self.clients.claim();
   })());
@@ -29,9 +30,9 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET' || request.mode !== 'navigate') return;
 
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
-  if (url.pathname !== APP_BASE_PATH && url.pathname !== INDEX_PATH) return;
+  const requested = new URL(request.url);
+  if (requested.origin !== self.location.origin) return;
+  if (requested.pathname !== APP_BASE_PATH && requested.pathname !== INDEX_PATH) return;
 
   event.respondWith((async () => {
     try {
@@ -42,9 +43,13 @@ self.addEventListener('fetch', event => {
       }
       return response;
     } catch (error) {
-      const cached = await caches.match(INDEX_URL);
+      const cache = await caches.open(CACHE_NAME);
+      const cached = await cache.match(INDEX_URL);
       if (cached) return cached;
-      throw error;
+      return new Response('オフラインです。通信できる場所でもう一度開いてください。', {
+        status: 503,
+        headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+      });
     }
   })());
 });
