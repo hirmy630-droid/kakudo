@@ -53,14 +53,15 @@ html,body,main,#fullView{touch-action:pan-x pan-y}
 #fullDiagram [data-edit]{cursor:pointer}#fullDiagram [data-edit]:focus-visible{outline:2px solid #fb923c}
 
 .angles .angle[role="button"]{cursor:pointer;min-height:48px;touch-action:manipulation;border-radius:8px}.angles .angle[role="button"]:focus-visible{outline:2px solid #fb923c;outline-offset:2px}.angles .angle[role="button"]:active{background:#27272a}
-</style><link rel="manifest" href="./manifest.json?v=20261010-1004">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-1004">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-1004">
+#editorMode{color:#fb923c}
+</style><link rel="manifest" href="./manifest.json?v=20261010-1030">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-1030">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-1030">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head><body><main><header class="app-heading"><h1>角度</h1><span class="brand">KYOWA ROOF</span></header>
-<section class="panel" aria-label="勾配と寸法の入力"><div class="twocol"><div class="field active" data-field="y"><input id="y" aria-label="勾配（水平100に対する高さ）" placeholder="" readonly inputmode="none"><svg id="slopePlaceholder" viewBox="0 0 100 62" aria-hidden="true"></svg></div><div class="field" data-field="x"><label id="angleFieldLabel" for="x">角度</label><input id="x" aria-label="角度（度）" placeholder="" readonly inputmode="none"></div></div><div class="field horizontal" data-field="c"><label class="label" for="c">水平寸法</label><input id="c" aria-label="水平寸法（ミリメートル）" placeholder="距離・長さ" readonly inputmode="none"><span class="unit">㎜</span></div><div class="keypad" aria-label="テンキー"></div></section>
+<section class="panel" aria-label="勾配と寸法の入力"><div class="twocol"><div class="field active" data-field="y"><input id="y" aria-label="勾配（水平100に対する高さ）" placeholder="" readonly inputmode="none"><svg id="slopePlaceholder" viewBox="0 0 100 62" aria-hidden="true"></svg></div><div class="field" data-field="x"><label id="angleFieldLabel" for="x">角度</label><input id="x" aria-label="角度（度）" placeholder="" readonly inputmode="none"></div></div><div class="field horizontal" data-field="c"><label id="horizontalFieldLabel" class="label" for="c">水平寸法</label><input id="c" aria-label="水平寸法（ミリメートル）" placeholder="距離・長さ" readonly inputmode="none"><span class="unit">㎜</span></div><div class="keypad" aria-label="テンキー"></div></section>
 
 <section class="results" aria-label="計算結果・逆算入力"><div class="result height" data-field="a"><label for="a">勾配幅</label><div><input id="a" aria-label="勾配幅（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div><div class="result hyp" data-field="b"><label for="b">斜辺</label><div><input id="b" aria-label="斜辺（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div></section>
 <p id="error" class="error" role="status"></p>
@@ -200,7 +201,10 @@ window.addEventListener('resize',()=>{for(const k of fields)fitInput(el(k),k==='
 function render(){
  const modeButton=el('fixedModeKey');if(modeButton){modeButton.textContent=fixedMode==='angle'?'角':'長';modeButton.setAttribute('aria-label',(fixedMode==='angle'?'角度固定。水平寸法固定へ切り替え':'水平寸法固定。角度固定へ切り替え'));}
 
- el('c').style.color=num('c')===100?'#fb923c':'#ffffff';
+ el('c').style.color=num('c')===100?'#c0c0c0':'#ffffff';
+ el('angleFieldLabel').style.color=fixedMode==='angle'?'#fb923c':'#c0c0c0';
+ el('slopePlaceholder').style.color=fixedMode==='angle'?'#fb923c':'#d4d4d8';
+ el('horizontalFieldLabel').style.color=fixedMode==='length'?'#fb923c':'#c0c0c0';
  for(const k of fields){el(k).value=k===active&&!fresh?values[k]:fmt(values[k],k==='x'?1:0);fitInput(el(k),k==='a'||k==='b'?28:k==='c'?26:23)}
  document.querySelectorAll('[data-field]').forEach(n=>n.classList.toggle('active',n.dataset.field===active));el('error').textContent=error;
  el('direction').setAttribute('aria-pressed',String(down));el('direction').setAttribute('aria-label',down?'上向きに切り替え':'下向きに切り替え');el('directionLabel').textContent=down?'下向き ⇅':'上向き ⇅';
@@ -273,7 +277,7 @@ function applyNumberEditor(){
  if(error){const message=error;values=before;error=beforeError;el('editorError').textContent=message;return}
  active=field;fresh=true;editBase=null;render();el('numberEditor').close();
 }
-for(const k of ['7','8','9','4','5','6','1','2','3','.','0','00','C','⌫']){
+for(const k of ['7','8','9','4','5','6','1','2','3','0','00','C']){
  const b=document.createElement('button');b.type='button';b.textContent=k;b.addEventListener('click',()=>editorKey(k));el('editorKeys').append(b);
 }
 el('fullDiagram').addEventListener('click',e=>{const target=e.target.closest('[data-edit]');if(target)openNumberEditor(target.dataset.edit)});
