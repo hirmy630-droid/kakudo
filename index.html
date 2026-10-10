@@ -54,6 +54,12 @@ html,body,main,#fullView{touch-action:pan-x pan-y}
 
 .angles .angle[role="button"]{cursor:pointer;min-height:48px;touch-action:manipulation;border-radius:8px}.angles .angle[role="button"]:focus-visible{outline:2px solid #fb923c;outline-offset:2px}.angles .angle[role="button"]:active{background:#27272a}
 #editorMode{color:#fb923c}
+/* テンキー：文字色をグレーにし、記号キーは少し細くする。固定・⏎はACと同色 */
+.keypad button{color:#d4d4d8}
+.keypad button.key-label{font-weight:600}
+.keypad #fixedModeKey,.keypad .enter{background:linear-gradient(180deg,#505056 0%,#414147 48%,#343439 100%);color:#d4d4d8}
+.keypad button.numeric-key{background:#303034!important}
+.key-row.digits button.numeric-key{background:#000000!important}
 </style><link rel="manifest" href="./manifest.json?v=20261010-1035">
 <link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-1035">
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-1035">
@@ -226,7 +232,7 @@ function render(){
 for(const [rowIndex,keys] of [['AC','固定','00','0','⏎','C'],['1','2','3','4','5','6','7','8','9']].entries()){
  const row=document.createElement('div');row.className='key-row'+(rowIndex===1?' digits':'');
  for(const k of keys){
- const b=document.createElement('button');b.type='button';b.textContent=k;if(k==='固定'){b.id='fixedModeKey';b.title='角：角度固定／長：水平寸法固定'}b.className=k==='⏎'?'enter':['AC','C'].includes(k)?'clear':'';if(k==='⏎')b.setAttribute('aria-label','次の入力欄へ');b.addEventListener('click',()=>key(String(k)));row.append(b);
+ const b=document.createElement('button');b.type='button';b.textContent=k;if(k==='固定'){b.id='fixedModeKey';b.title='角：角度固定／長：水平寸法固定'}b.className=k==='⏎'?'enter':['AC','C'].includes(k)?'clear':'';if(/^\d+$/.test(k))b.classList.add('numeric-key');else b.classList.add('key-label');if(k==='⏎')b.setAttribute('aria-label','次の入力欄へ');b.addEventListener('click',()=>key(String(k)));row.append(b);
  }
  document.querySelector('.keypad').append(row);
 }

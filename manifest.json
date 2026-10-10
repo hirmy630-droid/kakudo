@@ -1,9 +1,8 @@
 {
-  "id": "./",
+  "id": "./index.html",
   "name": "角度",
   "short_name": "角度",
-  "lang": "ja",
-  "start_url": "./index.html?v=20261010-1035",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#09090b",
@@ -12,14 +11,7 @@
     {
       "src": "./icon-192.png",
       "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "./icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
+      "type": "image/png"
     }
   ]
 }
