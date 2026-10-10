@@ -47,12 +47,15 @@ html,body,main,#fullView{touch-action:pan-x pan-y}
 
 .full-bar{order:3;padding-top:10px;gap:12px}.full-canvas{order:1}.full-unit{order:2}.full-bar button{flex:1}
 #numberEditor{width:min(360px,calc(100% - 20px));max-height:calc(100dvh - 20px);overflow:auto;border:1px solid #71717a;border-radius:16px;padding:14px;background:#18181b;color:#fff}
+#editorTitle:focus{outline:none}.result[role="button"]{cursor:pointer}.result[role="button"]:focus-visible{outline:2px solid #fb923c;outline-offset:2px}
 #numberEditor::backdrop{background:rgba(0,0,0,.65)}#numberEditor h2{font-size:18px;margin:0 0 10px}#editorValue{display:block;background:#09090b;min-height:48px;border-radius:8px;padding:8px;text-align:right;font-size:26px;overflow-wrap:anywhere}
 .editor-keys{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin-top:10px}.editor-keys button,.editor-actions button{min-height:44px;border:1px solid #52525b;background:#303034;color:#fff;font-size:20px;border-radius:6px}.editor-actions{display:flex;gap:8px;margin-top:10px}.editor-actions button{flex:1;font-size:16px}#editorApply{background:#b85c00}.editor-note{font-size:14px;color:#a1a1aa;margin:8px 0}#editorError{font-size:14px;color:#fca5a5;margin:8px 0}
 #fullDiagram [data-edit]{cursor:pointer}#fullDiagram [data-edit]:focus-visible{outline:2px solid #fb923c}
-</style><link rel="manifest" href="./manifest.json?v=20261010-0941">
-<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-0941">
-<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-0941">
+
+.angles .angle[role="button"]{cursor:pointer;min-height:48px;touch-action:manipulation;border-radius:8px}.angles .angle[role="button"]:focus-visible{outline:2px solid #fb923c;outline-offset:2px}.angles .angle[role="button"]:active{background:#27272a}
+</style><link rel="manifest" href="./manifest.json?v=20261010-1004">
+<link rel="apple-touch-icon" sizes="180x180" href="./icon-180.png?v=20261010-1004">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=20261010-1004">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -61,10 +64,10 @@ html,body,main,#fullView{touch-action:pan-x pan-y}
 
 <section class="results" aria-label="計算結果・逆算入力"><div class="result height" data-field="a"><label for="a">勾配幅</label><div><input id="a" aria-label="勾配幅（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div><div class="result hyp" data-field="b"><label for="b">斜辺</label><div><input id="b" aria-label="斜辺（ミリメートル）" placeholder="0" readonly inputmode="none"><span class="unit">㎜</span></div></div></section>
 <p id="error" class="error" role="status"></p>
-<section class="preview"><div class="preview-head"><div class="angles" aria-label="A・Bと斜辺の角度"><div class="angle"><label for="angleA">A〜斜辺</label><output id="angleA">—</output></div><div class="angle"><label for="angleB">B〜斜辺</label><output id="angleB">—</output></div></div><button type="button" id="direction" class="toggle" aria-label="下向きに切り替え" aria-pressed="false"><svg id="directionIcon" viewBox="0 0 100 62" aria-hidden="true"></svg><span id="directionLabel">上向き ⇅</span></button></div><div class="drawing" id="openDiagram" role="button" tabindex="0" aria-label="図を全画面で表示" aria-haspopup="dialog"><svg id="diagram" viewBox="0 0 400 205" role="img" aria-label="上向きの勾配図"></svg></div><p class="note">寸法は㎜単位で四捨五入して表示します。</p></section>
+<section class="preview"><div class="preview-head"><div class="angles" aria-label="A・Bと斜辺の角度"><div class="angle" id="editAngleA" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Aの角度を変更"><label for="angleA">A〜斜辺</label><output id="angleA">—</output></div><div class="angle" id="editAngleB" role="button" tabindex="0" aria-haspopup="dialog" aria-label="Bの角度を変更"><label for="angleB">B〜斜辺</label><output id="angleB">—</output></div></div><button type="button" id="direction" class="toggle" aria-label="下向きに切り替え" aria-pressed="false"><svg id="directionIcon" viewBox="0 0 100 62" aria-hidden="true"></svg><span id="directionLabel">上向き ⇅</span></button></div><div class="drawing" id="openDiagram" role="button" tabindex="0" aria-label="図を全画面で表示" aria-haspopup="dialog"><svg id="diagram" viewBox="0 0 400 205" role="img" aria-label="上向きの勾配図"></svg></div><p class="note">寸法は㎜単位で四捨五入して表示します。</p></section>
 </main>
 <dialog id="fullView" aria-label="勾配図の全画面表示"><div class="full-layout"><div class="full-bar"><button type="button" id="fullDirection">上下切替</button><button type="button" id="closeDiagram" autofocus>閉じる ×</button></div><div class="full-canvas"><svg id="fullDiagram" viewBox="0 0 440 340" role="img" aria-label="角度付き勾配図"></svg></div><p class="full-unit">数字をタップして変更　寸法：㎜</p></div></dialog>
-<dialog id="numberEditor" aria-labelledby="editorTitle"><h2 id="editorTitle">数値変更</h2><output id="editorValue"></output><p id="editorMode" class="editor-note"></p><div id="editorKeys" class="editor-keys"></div><p id="editorError" role="status"></p><div class="editor-actions"><button type="button" id="editorCancel">キャンセル</button><button type="button" id="editorApply">確定</button></div></dialog>
+<dialog id="numberEditor" aria-labelledby="editorTitle"><h2 id="editorTitle" tabindex="-1" autofocus>数値変更</h2><output id="editorValue"></output><p id="editorMode" class="editor-note"></p><div id="editorKeys" class="editor-keys"></div><p id="editorError" role="status"></p><div class="editor-actions"><button type="button" id="editorCancel">キャンセル</button><button type="button" id="editorApply">確定</button></div></dialog>
 <script>
 'use strict';
 // Suppress multi-touch page zoom while preserving one-finger scrolling.
@@ -221,11 +224,20 @@ for(const [rowIndex,keys] of [['AC','固定','00','0','⏎','C'],['1','2','3','4
  }
  document.querySelector('.keypad').append(row);
 }
-document.querySelectorAll('[data-field]').forEach(n=>{n.addEventListener('click',()=>select(n.dataset.field));n.querySelector('input').addEventListener('focus',()=>select(n.dataset.field))});
+document.querySelectorAll('[data-field]').forEach(n=>{
+ const field=n.dataset.field,input=n.querySelector('input');
+ if(field==='a'||field==='b'){
+  n.setAttribute('role','button');n.setAttribute('tabindex','0');n.setAttribute('aria-haspopup','dialog');
+  n.setAttribute('aria-label',field==='a'?'勾配幅を変更':'斜辺を変更');input.setAttribute('tabindex','-1');
+  n.addEventListener('pointerdown',e=>e.preventDefault());
+  n.addEventListener('click',()=>openNumberEditor(field));
+  n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();openNumberEditor(field)}});
+ }else{n.addEventListener('click',()=>select(field));input.addEventListener('focus',()=>select(field))}
+});
 // Custom keypad: select the field without focusing the native text input.
 el('c').addEventListener('pointerdown',e=>{e.preventDefault();select('c')});
 el('direction').addEventListener('click',()=>{down=!down;render()});
-document.addEventListener('keydown',e=>{if(el('fullView').open)return;if(e.ctrlKey||e.metaKey||e.altKey)return;if(e.target.tagName==='BUTTON'&&['Enter',' '].includes(e.key))return;let k=e.key==='Enter'?'⏎':e.key==='Delete'?'C':e.key==='Escape'?'AC':e.key;if(/^[0-9.]$/.test(k)||['⏎','C','AC','Backspace'].includes(k)){e.preventDefault();key(k)}});
+document.addEventListener('keydown',e=>{if(el('fullView').open||el('numberEditor').open)return;if(e.ctrlKey||e.metaKey||e.altKey)return;if(e.target.tagName==='BUTTON'&&['Enter',' '].includes(e.key))return;let k=e.key==='Enter'?'⏎':e.key==='Delete'?'C':e.key==='Escape'?'AC':e.key;if(/^[0-9.]$/.test(k)||['⏎','C','AC','Backspace'].includes(k)){e.preventDefault();key(k)}});
 
 let editorField='c',editorDraft='',editorFresh=true;
 function openNumberEditor(field){
@@ -234,8 +246,9 @@ function openNumberEditor(field){
  editorDraft=v&&v!=='—'?String(Number(Number(v).toFixed(6))):'';
  el('editorTitle').textContent=({c:'水平寸法（㎜）',a:'勾配幅（㎜）',b:'斜辺（㎜）',A:'Aの角度（°）',B:'Bの角度（°）'})[field];
  el('editorValue').textContent=editorDraft||'—';el('editorError').textContent='';
- el('editorMode').textContent=fixedMode==='angle'?'角度固定':'水平寸法固定';
+ el('editorMode').textContent=field==='A'||field==='B'?'水平寸法固定':fixedMode==='angle'?'角度固定':'水平寸法固定';
  el('numberEditor').showModal();
+ el('editorTitle').focus({preventScroll:true});
 }
 function editorKey(k){
  if(k==='C'){editorDraft='';editorFresh=false}
@@ -265,9 +278,14 @@ for(const k of ['7','8','9','4','5','6','1','2','3','.','0','00','C','⌫']){
 }
 el('fullDiagram').addEventListener('click',e=>{const target=e.target.closest('[data-edit]');if(target)openNumberEditor(target.dataset.edit)});
 el('fullDiagram').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const target=e.target.closest('[data-edit]');if(target){e.preventDefault();openNumberEditor(target.dataset.edit)}}});
+for(const field of ['A','B']){
+ const button=el('editAngle'+field);
+ button.addEventListener('click',()=>openNumberEditor(field));
+ button.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();openNumberEditor(field)}});
+}
 el('editorCancel').addEventListener('click',()=>el('numberEditor').close());
 el('editorApply').addEventListener('click',applyNumberEditor);
-el('numberEditor').addEventListener('keydown',e=>{if(e.key==='Escape')return;if(e.target.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;if(/^[0-9.]$/.test(e.key)){e.preventDefault();editorKey(e.key)}else if(e.key==='Backspace'){e.preventDefault();editorKey('⌫')}else if(e.key==='Enter'){e.preventDefault();applyNumberEditor()}});
+el('numberEditor').addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape')return;if(e.target.tagName==='BUTTON'&&(e.key==='Enter'||e.key===' '))return;if(/^[0-9.]$/.test(e.key)){e.preventDefault();editorKey(e.key)}else if(e.key==='Backspace'){e.preventDefault();editorKey('⌫')}else if(e.key==='Enter'){e.preventDefault();applyNumberEditor()}});
 let savedScroll=0,previousBodyStyle='';
 function openDiagram(){
  if(el('fullView').open)return;
